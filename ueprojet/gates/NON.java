@@ -1,4 +1,4 @@
-import java.awt.Point;
+
 public class NON extends Composant {
 
     public NON(String id, int x,int y)

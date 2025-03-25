@@ -1,14 +1,12 @@
-import java.awt.Point;
+public class XOR extends Composant {
 
-
-public class ET extends Composant extands state
-
-    public ET(String id, int x,int y )
+    public XOR(String id, int x,int y)
     {
         super(id,x,y);
         this.addInput(State.UNKNOWN);
         this.addInput(State.UNKNOWN);
         this.addOutput(State.UNKNOWN);
+        
     }
 
     @Override
@@ -25,34 +23,29 @@ public class ET extends Composant extands state
             }
             else
             {
-                if(input1==State.FALSE || input2==State.FALSE)
+                if(input1==State.UNKNOWN || input2==State.UNKNOWN)
                 {
-                    output=State.FALSE;
+                    output=State.UNKNOWN;
                 }
                 else
-                    if(input1==State.UNKNOWN || input2==State.UNKNOWN)
+                {
+                    if((input1==State.TRUE && input2==State.FALSE) || (input1==State.FALSE && input2==State.TRUE))
                     {
-                        output=State.UNKNOWN;
+                            output=State.TRUE;
                     }
-                    else 
-                    { 
-                        /*c'est du plus juste au cas ou, les conditions avant le verifie déjà*/
-                        if(input1==State.TRUE)
-                        {
-                            output=input2;
-                        }
-                        else
-                        {
+                    else
+                    {
                             output=State.FALSE;
-                        }
                     }
+                    
+                }
             }
             this.outputs.set(0,output);
             this.state=output;
         }
         else
         {
-            throw new IllegalStateException("Erreur d'évaluation : La porte ET doit avoir exactement 2 inputs et 1 output.");
+            throw new IllegalStateException("Erreur d'évaluation : La porte XOR doit avoir exactement 2 inputs et 1 output.");
         }
     }
 }

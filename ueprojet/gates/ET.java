@@ -1,7 +1,4 @@
-import java.awt.Point;
-
-
-public class ET extends Composant extands state
+public class ET extends Composant {
 
     public ET(String id, int x,int y )
     {

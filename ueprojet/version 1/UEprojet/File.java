@@ -1,29 +1,40 @@
-class File {
-    private Composant source;
-    private int sourceOutputIndex;
-    private Composant destination;
-    private int destinationInputIndex;
-    private boolean value; 
 
-    public void Wire(Composant source, int sourceOutputIndex, Composant destination, int destinationInputIndex, boolean I) {
-        this.source = source;
-        this.sourceOutputIndex = sourceOutputIndex;
-        this.destination = destination;
-        this.destinationInputIndex = destinationInputIndex;
-        this.value = I; // Initialisation par défaut
-    }
-    public int getdestination(){
-        return this.destinationInputIndex;
-    }
-    public boolean getValue() {
-        return value;
-    }
+public class File {
+   private Composant Source;
+   private Composant Destination;
+   private State value;
+   private int sourceOutputIndex;
+   private int destinationInputIndex; 
+   // private int[] path; 
+   
+   public File(Composant Source, Composant Destination, State value, 
+		   int destinationInputIndex, int sourceOutputIndex) {
+	    this.Source = Source;
+	    this.Destination = Destination;
+	    this.value = value;
+	    this.destinationInputIndex = destinationInputIndex; 
+	    this.sourceOutputIndex = sourceOutputIndex; 
+	 
+   }
+  
 
-    public void update() {
-        boolean newValue = source.getOutput(sourceOutputIndex);
-        if (newValue != value) {
-            value = newValue;
-            destination.setInputs(this.destinationInputIndex, this.value);
-        }
-    }
+   public Composant getSource() {
+	    return Source;
+   }
+   
+   public Composant getDestination() {
+	   return Destination;
+ }
+
+   public State getValue() {
+	    return value;
+}
+   
+   public void update() {
+       State newValue = Source.getOutput(sourceOutputIndex);
+       if (newValue != value) {
+           value = newValue;
+           Destination.setInputs(destinationInputIndex, value);
+       }
+   }
 }
