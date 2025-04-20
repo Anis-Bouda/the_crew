@@ -60,4 +60,37 @@ public class ADDER extends Composant{
             throw new IllegalStateException("ADDER doit avoir 2n+1 entrées et n+1 sorties.");
         }
     }
+    public boolean equals(Object obj)
+	{
+		if(this==obj)
+		{
+			return true;
+		}
+		if (!super.equals(obj))
+		 {
+			return false;
+		 }
+		 ADDER objet=(ADDER) obj;
+         if(this.n!=objet.n)
+         {
+            return false;
+         }
+         boolean res=true;
+         res=res && this.bitaddGates.equals(objet.bitaddGates);
+         return res;
+
+	}
+	@Override
+	public String toString()
+	{
+        return super.toString() + ", n=" + this.n + ", bitaddGates=" + this.bitaddGates ;
+	}
+	@Override
+	public int hashCode()
+	{
+		int res=super.hashCode();
+		res= res * 71 + this.n;
+        res= res * 71 + (this.bitaddGates != null ? this.bitaddGates.hashCode() : 0);
+		return res;
+	}
 }

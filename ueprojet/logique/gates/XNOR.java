@@ -1,6 +1,6 @@
 package gates ;
 import Principale.*;
-import gates.*;
+
 
 public class XNOR extends Composant {
      

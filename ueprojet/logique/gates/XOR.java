@@ -1,4 +1,6 @@
 package gates ;
+import Principale.*;
+
 public class XOR extends Composant {
 
     public XOR(String id, int x,int y)
