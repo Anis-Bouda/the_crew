@@ -10,9 +10,9 @@ public class PropertiesPanel extends JPanel {
 
     public PropertiesPanel() {
         setLayout(new GridLayout(3, 2)); // 3 lignes, 2 colonnes
-        setBorder(BorderFactory.createTitledBorder("🔍 Propriétés"));
+        setBorder(BorderFactory.createTitledBorder(" Propriétés"));
 
-        // 🔹 Labels et champs pour stocker les informations
+        //  Labels et champs pour stocker les informations
         add(new JLabel("X :"));
         xField = new JTextField();
         xField.setEditable(false); // Empêche la modification manuelle
@@ -29,7 +29,7 @@ public class PropertiesPanel extends JPanel {
         add(componentField);
     }
 
-    // 📌 Méthode pour mettre à jour les valeurs des champs
+    //  Méthode pour mettre à jour les valeurs des champs
     public void updateProperties(int x, int y, String componentName) {
         xField.setText(String.valueOf(x));
         yField.setText(String.valueOf(y));

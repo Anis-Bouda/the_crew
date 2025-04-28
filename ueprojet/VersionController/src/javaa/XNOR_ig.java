@@ -27,12 +27,12 @@ public class XNOR_ig extends AbstractComponent {
 
                 for (Point port : getInputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port d'entrée XNOR sélectionné !");
+                        System.out.println(" Port d'entrée XNOR sélectionné !");
                     }
                 }
                 for (Point port : getOutputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port de sortie XNOR sélectionné !");
+                        System.out.println(" Port de sortie XNOR sélectionné !");
                     }
                 }
             }
@@ -94,7 +94,7 @@ public class XNOR_ig extends AbstractComponent {
     // mettre a jour la sortie dans la sortie graphique 
     public void updateOutput(State output) {
         this.outputState = output;
-        System.out.println("🖥️ Sortie mise à jour dans la vue : " + output);
+        System.out.println(" Sortie mise à jour dans la vue : " + output);
         repaint(); 
     }
 }

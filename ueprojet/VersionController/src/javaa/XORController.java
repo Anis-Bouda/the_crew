@@ -32,6 +32,6 @@ public class XORController {
         view.updateOutput(output); 
         
         // Afficher le résultat dans la console
-        System.out.println("🔎 Résultat modèle : " + output);
+        System.out.println("Résultat modèle : " + output);
     }
 }

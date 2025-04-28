@@ -27,24 +27,24 @@ public class ComposantPanel extends JPanel {
     public ComposantPanel() {
         setLayout(new BorderLayout());
 
-        // 🔹 Création du nœud racine
+        //  Création du nœud racine
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Composants");
 
-        // 🔹 Création des catégories
+        // Création des catégories
         DefaultMutableTreeNode Gates = new DefaultMutableTreeNode("Gates");
         DefaultMutableTreeNode Perxers = new DefaultMutableTreeNode("Plexers");
         DefaultMutableTreeNode Memory = new DefaultMutableTreeNode("Memory");
         DefaultMutableTreeNode Arithmetic = new DefaultMutableTreeNode("Arithmetic");
         DefaultMutableTreeNode Wirray = new DefaultMutableTreeNode("Wiring");
 
-        // 🔹 Ajout des catégories au nœud racine
+        // Ajout des catégories au nœud racine
         root.add(Gates);
         root.add(Perxers);
         root.add(Memory);
         root.add(Arithmetic);
         root.add(Wirray);
 
-        // 🔹 Ajout des sous-composants
+        //  Ajout des sous-composants
         Gates.add(new DefaultMutableTreeNode("NOT"));
         Gates.add(new DefaultMutableTreeNode("OR"));
         Gates.add(new DefaultMutableTreeNode("AND"));
@@ -156,11 +156,11 @@ public class ComposantPanel extends JPanel {
 
         tree.setCellRenderer(new ComposantTreeCellRenderer());
 
-        // 🔹 Ajout du défilement
+        //  Ajout du défilement
         JScrollPane scrollPane = new JScrollPane(tree);
         scrollPane.setPreferredSize(new Dimension(300, 250));
 
-        // 🔹 Ajout de l'arbre au panneau
+        //  Ajout de l'arbre au panneau
         add(scrollPane, BorderLayout.CENTER);
     }
     private void activatePokeTool() {
@@ -200,7 +200,7 @@ public class ComposantPanel extends JPanel {
     }
 
 
-    // 🔹 Classe interne pour personnaliser l'affichage des icônes
+    //  Classe interne pour personnaliser l'affichage des icônes
     static class ComposantTreeCellRenderer extends DefaultTreeCellRenderer {
 
         private Icon resizeIcon(String path, int width, int height) {
@@ -223,7 +223,7 @@ public class ComposantPanel extends JPanel {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
             String nodeName = node.getUserObject().toString();
 
-            // 🔹 Assignation des icônes
+            //  Assignation des icônes
             switch (nodeName) {
                 
 

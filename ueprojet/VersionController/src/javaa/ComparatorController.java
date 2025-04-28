@@ -41,6 +41,6 @@ public class ComparatorController {
         }
         view.updateOutputs(outputs);
         for (int i = 0; i < 3; i++) {
-            System.out.println("🔎 Sortie " + i + " : " + model.getOutput(i));
+            System.out.println("Sortie " + i + " : " + model.getOutput(i));
     }}
 }

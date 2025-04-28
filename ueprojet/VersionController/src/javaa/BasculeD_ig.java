@@ -22,12 +22,12 @@ public class BasculeD_ig extends AbstractComponent6 {
 
                 for (java.awt.Point port : getInputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port d'entrée RAM sélectionné !");
+                        System.out.println(" Port d'entrée RAM sélectionné !");
                     }
                 }
                 for (java.awt.Point port : getOutputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port de sortie RAM sélectionné !");
+                        System.out.println("Port de sortie RAM sélectionné !");
                     }
                 }
             }
@@ -111,6 +111,6 @@ public class BasculeD_ig extends AbstractComponent6 {
         repaint();
         // Affiche les états dans la console
         for (int i = 0; i < outputs.size(); i++) {
-            System.out.println("🖥️ Sortie " + i + " mise à jour dans la vue : " + outputs.get(i));
+            System.out.println(" Sortie " + i + " mise à jour dans la vue : " + outputs.get(i));
         }}
 }

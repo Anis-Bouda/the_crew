@@ -20,12 +20,12 @@ public class ROM_ig extends AbstractComponent3 {
 
                 for (java.awt.Point port : getInputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port d'entrée RAM sélectionné !");
+                        System.out.println("Port d'entrée RAM sélectionné !");
                     }
                 }
                 for (java.awt.Point port : getOutputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port de sortie RAM sélectionné !");
+                        System.out.println("Port de sortie RAM sélectionné !");
                     }
                 }
             }
@@ -112,7 +112,7 @@ public class ROM_ig extends AbstractComponent3 {
 
     public void updateOutput(int index, State output) {
         outputStates.set(index, output);
-        System.out.println("🖥️ Sortie dans la vue : " + output);
+        System.out.println(" Sortie dans la vue : " + output);
         repaint();
     }
 }

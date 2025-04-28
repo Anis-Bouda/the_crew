@@ -37,6 +37,6 @@ public class NegatorController {
         }
         view.updateOutputs(outputs);
         for (int i = 0; i < 2; i++) {
-            System.out.println("🔎 Sortie " + i + " : " + model.getOutput(i));
+            System.out.println(" Sortie " + i + " : " + model.getOutput(i));
     }}
 }

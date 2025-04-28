@@ -16,17 +16,17 @@ public class BUFFER_ig extends AbstractComponent {
             @Override
             public void mouseClicked(MouseEvent e) {
                 java.awt.Point clickPoint = e.getPoint();
-                clickPoint.translate(getX(), getY()); // ✅ Convertir en coordonnées globales
+                clickPoint.translate(getX(), getY()); // Convertir en coordonnées globales
 
                 // Vérification de la sélection des ports d'entrée et de sortie
                 for (java.awt.Point port : getInputPorts()) { 
                     if (port.distance(clickPoint) < 10) { 
-                        System.out.println("✅ Port d'entrée BUFFER sélectionné !");
+                        System.out.println(" Port d'entrée BUFFER sélectionné !");
                     }
                 }
                 for (java.awt.Point port : getOutputPorts()) { 
                     if (port.distance(clickPoint) < 10) { 
-                        System.out.println("✅ Port de sortie BUFFER sélectionné !");
+                        System.out.println("Port de sortie BUFFER sélectionné !");
                     }
                 }
             }
@@ -80,7 +80,7 @@ public class BUFFER_ig extends AbstractComponent {
     // mettre a jour la sortie dans la sortie graphique 
     public void updateOutput(State output) {
         this.outputState = output;
-        System.out.println("🖥️ Sortie mise à jour dans la vue : " + output);
+        System.out.println(" Sortie mise à jour dans la vue : " + output);
         repaint(); 
     }
 }

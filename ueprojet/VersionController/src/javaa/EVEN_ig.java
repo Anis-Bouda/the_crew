@@ -29,12 +29,12 @@ public class EVEN_ig extends AbstractComponent {
 
                 for (java.awt.Point port : getInputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port d'entrée EVEN PARITY sélectionné !");
+                        System.out.println("Port d'entrée EVEN PARITY sélectionné !");
                     }
                 }
                 for (java.awt.Point port : getOutputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port de sortie EVEN PARITY sélectionné !");
+                        System.out.println("Port de sortie EVEN PARITY sélectionné !");
                     }
                 }
             }
@@ -89,7 +89,7 @@ public class EVEN_ig extends AbstractComponent {
     // mettre a jour la sortie dans la sortie graphique 
     public void updateOutput(State output) {
         this.outputState = output;
-        System.out.println("🖥️ Sortie mise à jour dans la vue : " + output);
+        System.out.println(" Sortie mise à jour dans la vue : " + output);
         repaint(); 
     }
 }

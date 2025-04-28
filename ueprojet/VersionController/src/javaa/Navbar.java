@@ -19,7 +19,6 @@ public class Navbar extends JPanel {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 System.out.println("Logo cliqué");
-                // Ajouter ton action ici (par exemple, ouvrir une autre fenêtre)
             }
         });
         add(logo, BorderLayout.WEST);
@@ -43,7 +42,6 @@ public class Navbar extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     System.out.println(text + " cliqué");
-                    // Ajouter ton action ici pour chaque lien
                 }
             });
 

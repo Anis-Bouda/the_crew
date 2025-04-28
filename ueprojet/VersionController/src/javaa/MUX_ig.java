@@ -20,12 +20,12 @@ public class MUX_ig extends AbstractComponent {
 
                 for (java.awt.Point port : getInputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port d'entrée MUX sélectionné !");
+                        System.out.println(" Port d'entrée MUX sélectionné !");
                     }
                 }
                 for (java.awt.Point port : getOutputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port de sortie MUX sélectionné !");
+                        System.out.println("Port de sortie MUX sélectionné !");
                     }
                 }
             }
@@ -100,7 +100,7 @@ public class MUX_ig extends AbstractComponent {
     // mettre a jour la sortie dans la sortie graphique 
     public void updateOutput(State output) {
         this.outputState = output;
-        System.out.println("🖥️ Sortie mise à jour dans la vue : " + output);
+        System.out.println(" Sortie mise à jour dans la vue : " + output);
         repaint(); 
     }
 }

@@ -166,7 +166,7 @@ public class Ligne extends JPanel {
         return Math.hypot(px - projX, py - projY);
     }
 
-    // ⬇️ Classe interne avec état
+    //  Classe interne avec état
     private static class LineSegment {
         Point start;
         Point end;

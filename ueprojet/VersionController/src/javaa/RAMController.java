@@ -35,6 +35,6 @@ public class RAMController {
        
         
         // Afficher le résultat dans la console
-        System.out.println("🔎 Résultat modèle : " + output);
+        System.out.println("Résultat modèle : " + output);
     }}
 }

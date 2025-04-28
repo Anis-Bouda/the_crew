@@ -22,12 +22,12 @@ public class DEMUX_ig extends AbstractComponent {
 
                 for (java.awt.Point port : getInputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port d'entrée DEMUX sélectionné !");
+                        System.out.println("Port d'entrée DEMUX sélectionné !");
                     }
                 }
                 for (java.awt.Point port : getOutputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("✅ Port de sortie DEMUX sélectionné !");
+                        System.out.println(" Port de sortie DEMUX sélectionné !");
                     }
                 }
             }
@@ -105,6 +105,6 @@ public class DEMUX_ig extends AbstractComponent {
         repaint();
         // Affiche les états dans la console
         for (int i = 0; i < outputs.size(); i++) {
-            System.out.println("🖥️ Sortie " + i + " mise à jour dans la vue : " + outputs.get(i));
+            System.out.println("Sortie " + i + " mise à jour dans la vue : " + outputs.get(i));
         }}
 }

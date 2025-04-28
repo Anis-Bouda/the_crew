@@ -39,6 +39,6 @@ public class DEMUXController {
         }
         view.updateOutputs(outputs);
         for (int i = 0; i < 4; i++) {
-            System.out.println("🔎 Sortie " + i + " : " + model.getOutput(i));
+            System.out.println("Sortie " + i + " : " + model.getOutput(i));
     }}
 }

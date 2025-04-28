@@ -72,6 +72,6 @@ public class Substractor_ig extends AbstractComponent {
         repaint();
         // Affiche les états dans la console
         for (int i = 0; i < outputs.size(); i++) {
-            System.out.println("🖥️ Sortie " + i + " mise à jour dans la vue : " + outputs.get(i));
+            System.out.println(" Sortie " + i + " mise à jour dans la vue : " + outputs.get(i));
         }}
 }

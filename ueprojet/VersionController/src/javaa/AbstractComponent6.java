@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import javax.swing.BorderFactory;
 
 public abstract class AbstractComponent6 extends AbstractComponent { 
-    // Rest of your code...
 
     public AbstractComponent6(String componentName, int numInputs, int numOutputs) {
         super(componentName, numInputs, numOutputs); 
@@ -30,7 +29,6 @@ public abstract class AbstractComponent6 extends AbstractComponent {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 super.mouseClicked(e);
-                // Your existing logic for port click handling
             }
         });
 
@@ -75,8 +73,4 @@ public abstract class AbstractComponent6 extends AbstractComponent {
         outputPorts.add(new Port(new java.awt.Point(128, 74)));
         outputPorts.add(new Port(new java.awt.Point(130, 30)));
     }
-
-
-
-    // Your existing methods for painting and port management
 }
