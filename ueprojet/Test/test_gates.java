@@ -9,7 +9,9 @@ public class test_gates {
         testXOR();
         testXNOR();
         testNOR();
-
+        testNAND();
+        testEVENParity();
+        testODDParity();
         System.out.println("********************   On fini les test  ********************\n");
         
 }
@@ -61,6 +63,32 @@ public static void testNOR() {
     PorteNOR.setInputs(1, State.FALSE);
     PorteNOR.evaluate();
     System.out.println("Test de la porte NOR (FALSE,FALSE) -> " + PorteNOR.getOutput(0) );
+}
+
+public static void testNAND() {
+    Composant nandGate = new NAND("NAND1", 6, 0);
+    nandGate.setInputs(0, State.TRUE);
+    nandGate.setInputs(1, State.TRUE);
+    nandGate.evaluate();
+    System.out.println("Test NAND (1,1) -> " + nandGate.getOutput(0) + " (Attendu : FALSE)");
+}
+
+public static void testEVENParity() {
+    Composant evenParity = new EVENParity("EVENParity1", 3, 0, 0);
+    evenParity.setInputs(0, State.TRUE);
+    evenParity.setInputs(1, State.FALSE);
+    evenParity.setInputs(2, State.TRUE);
+    evenParity.evaluate();
+    System.out.println("Test EVEN Parity (1,0,1) -> " + evenParity.getOutput(0) + " (Attendu : TRUE)");
+}
+
+public static void testODDParity() {
+    Composant oddParity = new ODDParity("ODDParity1", 3, 0, 0);
+    oddParity.setInputs(0, State.TRUE);
+    oddParity.setInputs(1, State.FALSE);
+    oddParity.setInputs(2, State.TRUE);
+    oddParity.evaluate();
+    System.out.println("Test ODD Parity (1,0,1) -> " + oddParity.getOutput(0) + " (Attendu : FALSE)");
 }
 
 }
