@@ -47,5 +47,5 @@ public static void testBasculeJK() {
             basculeJK.getOutput(0) + ", " + basculeJK.getOutput(1) + "] " +
             "(Attendu : [TRUE, FALSE])");
 }
-
+    
 }
