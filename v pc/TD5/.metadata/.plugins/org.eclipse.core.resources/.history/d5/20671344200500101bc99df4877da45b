@@ -1,0 +1,84 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class Point extends JPanel {
+
+    // Espacement des points dans la grille
+    private static final int DOT_SPACING = 10;  // Espacement entre les points
+    private static final int SQUARE_SIZE = 50;  // Taille du carré
+
+    private int squareX, squareY;  // Position du carré
+    private int mouseX, mouseY;  // Position de la souris lors du clic
+    private boolean dragging = false;  // Si le carré est en train d'être déplacé
+
+    public Point(int x, int y) {
+        // Initialiser la position du carré
+        squareX = (getWidth() - SQUARE_SIZE) / 2;
+        squareY = (getHeight() - SQUARE_SIZE) / 2;
+
+        // Définir les propriétés du panneau
+        setBackground(Color.WHITE);  // Fond blanc
+
+        // Ajouter des écouteurs de souris
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // Vérifie si la souris est dans le carré (démarre le déplacement)
+                if (e.getX() >= squareX && e.getX() <= squareX + SQUARE_SIZE &&
+                    e.getY() >= squareY && e.getY() <= squareY + SQUARE_SIZE) {
+                    dragging = true;
+                    mouseX = e.getX() - squareX;  // Calculer la distance entre la souris et le coin supérieur gauche du carré
+                    mouseY = e.getY() - squareY;
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                dragging = false; // Arrêter de déplacer le carré
+            }
+        });
+
+        // Ajouter un écouteur de souris pour capturer les déplacements pendant que le bouton est enfoncé
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (dragging) {
+                    // Mettre à jour la position du carré en fonction du mouvement de la souris
+                    squareX = e.getX() - mouseX;
+                    squareY = e.getY() - mouseY;
+                    repaint(); // Redessiner le panneau pour mettre à jour la position du carré
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        // Récupérer le graphique 2D pour un rendu plus précis
+        Graphics2D g2d = (Graphics2D) g;
+
+        // Définir la couleur des points
+        g2d.setColor(Color.LIGHT_GRAY);
+
+        // Récupérer les dimensions du canevas
+        int width = getWidth();
+        int height = getHeight();
+
+        // Remplir tout le JPanel avec des points (petits cercles)
+        for (int x = 0; x < width; x += DOT_SPACING) {
+            for (int y = 0; y < height; y += DOT_SPACING) {
+                g2d.fillOval(x, y, 2, 2);  // Dessine un petit cercle (point) à chaque position
+            }
+        }
+
+        // Dessiner un carré avec des bordures rouges
+        g2d.setColor(Color.RED);  // Choisir la couleur des bordures
+
+        // Dessiner la bordure du carré
+        g2d.setStroke(new BasicStroke(3));  // Définit l'épaisseur des bordures
+        g2d.drawRect(squareX, squareY, SQUARE_SIZE, SQUARE_SIZE);  // Dessiner la bordure du carré
+    }
+}

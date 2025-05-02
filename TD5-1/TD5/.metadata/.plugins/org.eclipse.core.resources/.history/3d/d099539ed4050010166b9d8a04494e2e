@@ -1,0 +1,48 @@
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JPanel;
+
+public class OR extends AbstractComponent {
+    public OR() {
+        super("OR", 2, 1); // 2 entrées, 1 sortie
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                java.awt.Point clickPoint = e.getPoint();
+                clickPoint.translate(getX(), getY()); // ✅ Convertir en coordonnées globales
+
+                for (java.awt.Point port : getInputPorts()) {
+                    if (port.distance(clickPoint) < 10) {
+                        System.out.println("✅ Port d'entrée OR sélectionné !");
+                    }
+                }
+                for (java.awt.Point port : getOutputPorts()) {
+                    if (port.distance(clickPoint) < 10) {
+                        System.out.println("✅ Port de sortie OR sélectionné !");
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(new BasicStroke(2));
+        g2.setColor(Color.BLACK);
+
+        // Dessiner la forme de la porte OR
+        g2.drawArc(10, 10, 50, 50, -30, 60);
+        g2.drawArc(10, 10, 50, 50, 210, 60);
+        g2.drawLine(10, 35, 30, 20);
+        g2.drawLine(10, 35, 30, 50);
+        g2.drawLine(60, 35, 80, 35); // Sortie
+
+        // Dessiner les entrées
+        g2.drawLine(0, 25, 20, 25);
+        g2.drawLine(0, 45, 20, 45);
+    }
+}

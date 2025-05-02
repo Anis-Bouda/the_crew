@@ -1,0 +1,186 @@
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+public class Ligne extends JPanel {
+    // Stocke toutes les lignes dessinées (libres ou connexions)
+    private List<LineSegment> segments = new ArrayList<>();
+    // Segment en cours de dessin (mode libre)
+    private LineSegment currentSegment;
+    private boolean drawing = false;
+    // Seuil de proximité pour la suppression (en pixels)
+    private final double DELETE_THRESHOLD = 5.0;
+
+    public Ligne() {
+        setBackground(Color.WHITE);
+
+        // Gestion du clic pour dessin libre et suppression
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // Clic droit : suppression d'un segment
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    for (int i = segments.size() - 1; i >= 0; i--) {
+                        LineSegment seg = segments.get(i);
+                        if (isPointNearSegment(e.getPoint(), seg)) {
+                            segments.remove(i);
+                            repaint();
+                            System.out.println("Segment supprimé !");
+                            return;
+                        }
+                    }
+                } else {
+                    // Clic gauche : début du dessin libre
+                    if (!drawing) {
+                        currentSegment = new LineSegment(e.getPoint(), e.getPoint(), false);
+                        drawing = true;
+                    }
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                // Clic gauche : finalisation du dessin libre
+                if (!SwingUtilities.isRightMouseButton(e) && drawing && currentSegment != null) {
+                    currentSegment.end = e.getPoint();
+                    segments.add(currentSegment);
+                    currentSegment = null;
+                    drawing = false;
+                    repaint();
+                    System.out.println("Ligne libre créée !");
+                }
+            }
+        });
+
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                // Mise à jour en temps réel de la ligne en cours (dessin libre)
+                if (drawing && currentSegment != null) {
+                    currentSegment.end = e.getPoint();
+                    repaint();
+                }
+            }
+        });
+    }
+
+    /**
+     * Ajoute une ligne de connexion avec coude.
+     * La ligne est ajoutée à la liste des segments et reste affichée.
+     * Après l'ajout, l'utilisateur peut continuer à dessiner librement ou supprimer des segments.
+     *
+     * @param start Le point de départ de la connexion (global)
+     * @param end Le point d'arrivée de la connexion (global)
+     */
+    public void setConnection(Point start, Point end) {
+        segments.add(new LineSegment(start, end, true));
+        // Réinitialisation de l'état de dessin libre afin de laisser la main à l'utilisateur
+        currentSegment = null;
+        drawing = false;
+        repaint();
+        System.out.println("Connexion créée !");
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.BLUE);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(3));
+
+        // Dessin de tous les segments sauvegardés
+        for (LineSegment seg : segments) {
+            drawSegment(g, seg);
+        }
+
+        // Dessin du segment en cours (mode libre)
+        if (currentSegment != null) {
+            drawSegment(g, currentSegment);
+        }
+    }
+
+    /**
+     * Méthode de dessin d'un segment.
+     * Si le segment n'est pas aligné horizontalement ou verticalement, on dessine un coude
+     * (horizontal puis vertical).
+     */
+    private void drawSegment(Graphics g, LineSegment seg) {
+        if (seg.start.x != seg.end.x && seg.start.y != seg.end.y) {
+            // Coude : tracé d'abord horizontal puis vertical
+            g.drawLine(seg.start.x, seg.start.y, seg.end.x, seg.start.y);
+            g.drawLine(seg.end.x, seg.start.y, seg.end.x, seg.end.y);
+        } else {
+            g.drawLine(seg.start.x, seg.start.y, seg.end.x, seg.end.y);
+        }
+    }
+
+    /**
+     * Vérifie si le point p est à proximité du segment (qu'il soit droit ou dessiné en coude).
+     */
+    private boolean isPointNearSegment(Point p, LineSegment seg) {
+        if (seg.start.x != seg.end.x && seg.start.y != seg.end.y) {
+            Point corner = new Point(seg.end.x, seg.start.y);
+            return isPointNearLine(p, seg.start, corner, DELETE_THRESHOLD)
+                    || isPointNearLine(p, corner, seg.end, DELETE_THRESHOLD);
+        } else {
+            return isPointNearLine(p, seg.start, seg.end, DELETE_THRESHOLD);
+        }
+    }
+
+    /**
+     * Retourne true si le point p est à une distance inférieure au seuil threshold de la droite formée par a et b.
+     */
+    private boolean isPointNearLine(Point p, Point a, Point b, double threshold) {
+        double distance = ptSegDist(a.x, a.y, b.x, b.y, p.x, p.y);
+        return distance <= threshold;
+    }
+
+    /**
+     * Calcule la distance entre un point (px,py) et le segment défini par (x1,y1) et (x2,y2).
+     */
+    private double ptSegDist(double x1, double y1, double x2, double y2, double px, double py) {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        if (dx == 0 && dy == 0) {
+            dx = px - x1;
+            dy = py - y1;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        double t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+        if (t < 0) {
+            dx = px - x1;
+            dy = py - y1;
+        } else if (t > 1) {
+            dx = px - x2;
+            dy = py - y2;
+        } else {
+            double projX = x1 + t * dx;
+            double projY = y1 + t * dy;
+            dx = px - projX;
+            dy = py - projY;
+        }
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // Classe interne pour représenter un segment de ligne
+    private static class LineSegment {
+        Point start;
+        Point end;
+        // isConnection vaut true pour une ligne de connexion (mais la logique de dessin en coude s'applique à tous)
+        boolean isConnection;
+
+        public LineSegment(Point start, Point end, boolean isConnection) {
+            this.start = start;
+            this.end = end;
+            this.isConnection = isConnection;
+        }
+    }
+}

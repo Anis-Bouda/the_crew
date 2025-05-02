@@ -1,0 +1,316 @@
+package GRAPHIQUE ;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import Principale.Composant;
+
+/**
+ * Composant de base, supporte Alt+clic pour rotation 90°
+ */
+public abstract class AbstractComponent extends JPanel {
+    protected List<Port> inputPorts = new ArrayList<>();
+    protected List<Port> outputPorts = new ArrayList<>();
+
+    protected String componentName;
+    protected int numInputs;
+    protected int numOutputs;
+    protected Composant composant;
+
+    // angle de rotation courant
+    protected int rotationAngle = 0;
+
+    public AbstractComponent(String componentName, int numInputs, int numOutputs) {
+        this.componentName = componentName;
+        this.numInputs = numInputs;
+        this.numOutputs = numOutputs;
+
+        setPreferredSize(new Dimension(80, 80));
+        setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, 0)));
+        setLayout(null);
+
+        updatePortPositions();
+
+        // listener pour clics : suppression, ports et rotation
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                final int CLICK_RADIUS = 4;
+                // Alt + clic gauche => rotate
+                if (e.isAltDown() && SwingUtilities.isLeftMouseButton(e)) {
+                    rotate90();
+                    ConnectionManager.updateConnectionsForComponent(AbstractComponent.this);
+                    return;
+                }
+                // clic droit => suppression
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    setVisible(false);
+                    removeComponent();
+                } else {
+                	if (e.isAltDown() && SwingUtilities.isLeftMouseButton(e)) {
+                	    rotateClockwise(); // ou rotateComponent() si tu préfères
+                	    return;
+                	}
+
+                    // clic gauche => ports
+                    for (int i = 0; i < inputPorts.size(); i++) {
+                        Port port = inputPorts.get(i);
+                        Point pos = port.getPosition();
+                        if (pos.distance(e.getPoint()) < CLICK_RADIUS) {
+                            Point gp = new Point(getX() + pos.x, getY() + pos.y);
+                            ConnectionManager.portClicked(AbstractComponent.this, "input", i, gp);
+                            return;
+                        }
+                    }
+                    for (int i = 0; i < outputPorts.size(); i++) {
+                        Port port = outputPorts.get(i);
+                        Point pos = port.getPosition();
+                        if (pos.distance(e.getPoint()) < CLICK_RADIUS) {
+                            Point gp = new Point(getX() + pos.x, getY() + pos.y);
+                            ConnectionManager.portClicked(AbstractComponent.this, "output", i, gp);
+                            return;
+                        }
+                    }
+                }
+            }
+        });
+
+        // curseur main sur ports
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                boolean over = false;
+                for (Port p : inputPorts) {
+                    if (p.getPosition().distance(e.getPoint()) < 4) { over = true; break; }
+                }
+                if (!over) {
+                    for (Port p : outputPorts) {
+                        if (p.getPosition().distance(e.getPoint()) < 4) { over = true; break; }
+                    }
+                }
+                setCursor(over ? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                               : Cursor.getDefaultCursor());
+            }
+        });
+    }
+
+    /**
+     * Rotation de 90° vers la droite.
+     */
+    public void rotate90() {
+        rotationAngle = (rotationAngle + 90) % 360;
+        Dimension d = getPreferredSize();
+        if (rotationAngle == 90 || rotationAngle == 270) {
+            setPreferredSize(new Dimension(d.height, d.width));
+        } else {
+            setPreferredSize(new Dimension(d.width, d.height));
+        }
+        revalidate();
+        repaint();
+    }
+    public void rotateClockwise() {
+        rotationAngle = (rotationAngle + 90) % 360;
+        repaint();
+        ConnectionManager.updateConnectionsForComponent(this);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        
+        Graphics2D g2 = (Graphics2D) g.create(); // On clone pour ne pas casser Graphics
+
+        int cx = getWidth() / 2;
+        int cy = getHeight() / 2;
+
+        // Appliquer la rotation
+        g2.rotate(Math.toRadians(rotationAngle), cx, cy);
+
+        // 🚀 Ton dessin du composant
+        drawComponent(g2);
+
+        // 🚀 Puis les ports
+        drawPorts(g2);
+
+        g2.dispose(); // Libère la copie
+    }
+
+    private void drawComponent(Graphics2D g2) {
+        // Ton triangle (NOT), ton demi-cercle (AND), ton dessin du composant ici
+    }
+
+    private void drawPorts(Graphics2D g2) {
+        g2.setColor(Color.RED);
+        for (Port p : inputPorts) {
+            Point pos = p.getPosition();
+            g2.fillOval(pos.x - 3, pos.y - 3, 6, 6);
+        }
+
+        g2.setColor(Color.GREEN);
+        for (Port p : outputPorts) {
+            Point pos = p.getPosition();
+            g2.fillOval(pos.x - 3, pos.y - 3, 6, 6);
+        }
+    }
+
+    protected void updatePortPositions() {
+        int width = getPreferredSize().width;
+        int height = getPreferredSize().height;
+        inputPorts.clear();
+        outputPorts.clear();
+
+        for (int i = 0; i < numInputs; i++) {
+            int offset = (i + 1) * height / (numInputs + 1);
+            Point pos;
+            switch (rotationAngle) {
+                case 0:
+                    pos = new Point(0, offset);
+                    break;
+                case 90:
+                    pos = new Point(offset, 0);
+                    break;
+                case 180:
+                    pos = new Point(width, offset);
+                    break;
+                case 270:
+                    pos = new Point(offset, height);
+                    break;
+                default:
+                    pos = new Point(0, offset);
+            }
+            inputPorts.add(new Port(pos));
+        }
+
+        for (int i = 0; i < numOutputs; i++) {
+            int offset = (i + 1) * height / (numOutputs + 1);
+            Point pos;
+            switch (rotationAngle) {
+                case 0:
+                    pos = new Point(width, offset);
+                    break;
+                case 90:
+                    pos = new Point(offset, height);
+                    break;
+                case 180:
+                    pos = new Point(0, offset);
+                    break;
+                case 270:
+                    pos = new Point(offset, 0);
+                    break;
+                default:
+                    pos = new Point(width, offset);
+            }
+            outputPorts.add(new Port(pos));
+        }
+    }
+
+
+
+ 
+    public List<Point> getInputPorts() {
+        List<Point> globals = new ArrayList<>();
+        for (int i = 0; i < inputPorts.size(); i++) {
+            globals.add(getGlobalPortLocation("input", i));
+        }
+        return globals;
+    }
+
+   
+    public List<Point> getOutputPorts() {
+        List<Point> globals = new ArrayList<>();
+        for (int i = 0; i < outputPorts.size(); i++) {
+            globals.add(getGlobalPortLocation("output", i));
+        }
+        return globals;
+    }
+
+
+    private void removeComponent() {
+        if (getParent() != null) {
+            getParent().remove(this);
+            getParent().revalidate();
+            getParent().repaint();
+            System.out.println("Composant supprimé !");
+        }
+    }
+
+   
+    public Point getGlobalPortLocation(String portType, int portIndex) {
+        // 1) port local « non-tourné »
+        Port p = "input".equals(portType)
+                 ? inputPorts.get(portIndex)
+                 : outputPorts.get(portIndex);
+        Point local = p.getPosition();
+
+        // 2) rotation autour du centre de la JPanel
+        int w = getWidth(), h = getHeight();
+        double cx = w/2.0, cy = h/2.0;
+        double rad = Math.toRadians(rotationAngle);
+        double dx = local.x - cx, dy = local.y - cy;
+        int rx = (int)Math.round(cx + dx*Math.cos(rad) - dy*Math.sin(rad));
+        int ry = (int)Math.round(cy + dx*Math.sin(rad) + dy*Math.cos(rad));
+
+        // 3) passage en coordonnées globales
+        return new Point(getX() + rx, getY() + ry);
+    }
+
+
+
+    public void setComposant(Composant composant) {
+        this.composant = composant;
+    }
+
+    public Composant getComposant() {
+        return composant;
+    }
+
+    public List<Principale.State> getInputStates() {
+        List<Principale.State> states = new ArrayList<>();
+        for (int i = 0; i < inputPorts.size(); i++) {
+            Principale.State inputState = Principale.State.UNKNOWN;
+            for (Connection conn : ConnectionManager.connections) {
+                if (conn.compTarget == this && conn.portTypeTarget.equals("input") && conn.portIndexTarget == i) {
+                    if (conn.filLogic != null) {
+                        inputState = conn.filLogic.getValue();
+                    }
+                    break;
+                }
+            }
+            states.add(inputState);
+        }
+        return states;
+    }
+
+    public void setInputsStates(List<Principale.State> states) {
+        Composant logic = getComposant();
+        if (logic != null) {
+            for (int i = 0; i < states.size(); i++) {
+                logic.setInputs(i, states.get(i));
+            }
+        }
+    }
+
+    public void updateOutputState() {
+        Composant logic = getComposant();
+        if (logic != null) {
+            List<Principale.State> outputs = logic.getOutputs();
+            for (int i = 0; i < outputs.size(); i++) {
+                outputPorts.get(i).setState(StateMapper.toGuiState(outputs.get(i)));
+            }
+        }
+    }
+
+	protected String getComponentName(){
+			return this.componentName;
+	}}

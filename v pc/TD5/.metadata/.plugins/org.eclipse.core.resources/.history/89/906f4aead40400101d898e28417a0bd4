@@ -1,0 +1,99 @@
+import java.awt.*;
+import javax.swing.*;
+
+public class MainLayout extends JPanel {
+
+    public MainLayout() {
+        setLayout(new BorderLayout());
+
+        // 🔹 Appliquer une police personnalisée
+        Font customFont = new Font("Arial", Font.BOLD, 16);
+
+        // 🔹 Liste des composants supportés
+        JPanel composants = new JPanel();
+        JLabel composantsLabel = new JLabel("🔹 Composants disponibles");
+        composantsLabel.setFont(customFont);
+        composantsLabel.setForeground(Color.BLUE); // Texte en bleu
+        composants.add(composantsLabel);
+
+        // 🔹 Panneau de contrôle avec boutons
+        JPanel control = new JPanel();
+        JButton runButton = new JButton("▶ Run");
+        JButton stopButton = new JButton("■ Stop");
+        JButton filterButton = new JButton("⚙ Filtrer");
+
+        // 🔹 Appliquer le style aux boutons
+        runButton.setFont(customFont);
+        stopButton.setFont(customFont);
+        filterButton.setFont(customFont);
+
+        control.add(runButton);
+        control.add(stopButton);
+        control.add(filterButton);
+
+        // 🔹 Zone pour afficher les propriétés des composants
+        JPanel propertiesArea = new JPanel();
+        JLabel propertiesLabel = new JLabel("⚙ Propriétés");
+        propertiesLabel.setFont(customFont);
+        propertiesLabel.setForeground(Color.RED);
+        propertiesArea.add(propertiesLabel);
+        propertiesArea.setBorder(BorderFactory.createTitledBorder("Propriétés"));
+
+        // 🔹 Panneau latéral gauche
+        JPanel simulationControl = new JPanel();
+        simulationControl.setLayout(new BoxLayout(simulationControl, BoxLayout.Y_AXIS));
+        simulationControl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        simulationControl.add(control);
+        simulationControl.add(new ComposantPanel());
+        simulationControl.add(propertiesArea);
+
+        add(simulationControl, BorderLayout.WEST);
+
+        // 🔹 Zone de conception
+        JPanel circuitDesignArea = new JPanel();
+        circuitDesignArea.setBackground(Color.LIGHT_GRAY);
+        circuitDesignArea.setBorder(BorderFactory.createTitledBorder("Zone de conception"));
+
+        add(circuitDesignArea, BorderLayout.CENTER);
+    }
+
+    // 📌 Modifier les styles du menu
+    public JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        Font menuFont = new Font("SansSerif", Font.BOLD, 14);
+
+        JMenu mnuFile = new JMenu("📁 Fichier");
+        mnuFile.setMnemonic('F');
+        mnuFile.setFont(menuFont);
+
+        JMenuItem mnuNewFile = new JMenuItem("🆕 Nouveau");
+        mnuNewFile.setFont(menuFont);
+        mnuNewFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
+
+        JMenuItem mnuOpenFile = new JMenuItem("📂 Ouvrir");
+        mnuOpenFile.setFont(menuFont);
+        mnuOpenFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
+
+        JMenuItem mnuSaveFile = new JMenuItem("💾 Enregistrer");
+        mnuSaveFile.setFont(menuFont);
+        mnuSaveFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+
+        JMenuItem mnuExitFile = new JMenuItem("🚪 Quitter");
+        mnuExitFile.setFont(menuFont);
+        mnuExitFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
+        mnuExitFile.addActionListener((e) -> ExitBtn(e));
+
+        mnuFile.add(mnuNewFile);
+        mnuFile.add(mnuOpenFile);
+        mnuFile.add(mnuSaveFile);
+        mnuFile.addSeparator();
+        mnuFile.add(mnuExitFile);
+
+        menuBar.add(mnuFile);
+
+        return menuBar;
+    }
+
+    // 📌 Méthode pour fermer l'application
+    private void ExitBtn(ActionEvent e) {
+        int a = JOptionPane

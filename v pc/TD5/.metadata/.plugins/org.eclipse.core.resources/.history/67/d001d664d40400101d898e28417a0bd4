@@ -1,0 +1,32 @@
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+
+import javax.swing.JPanel;
+
+public class CustomPanel extends JPanel {
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        // 🔹 Améliorer la qualité d'affichage
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // 🔹 Définir une police stylisée
+        Font customFont = new Font("Arial", Font.BOLD | Font.ITALIC, 24);
+        g2d.setFont(customFont);
+
+        // 🔹 Définir une couleur pour le texte
+        g2d.setColor(Color.BLUE);
+
+        // 🔹 Dessiner le texte à une position spécifique
+        g2d.drawString("Porte AND", 100, 100);
+
+        // 🔹 Ajouter une ombre pour effet 3D
+        g2d.setColor(Color.GRAY);
+        g2d.drawString("Porte AND", 102, 102);
+    }
+}

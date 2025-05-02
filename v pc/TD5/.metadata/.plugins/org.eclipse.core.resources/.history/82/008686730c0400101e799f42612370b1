@@ -1,0 +1,55 @@
+
+import java.awt.MediaTracker;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
+public class MainView extends JFrame {
+
+    public MainView() {
+        // Set window title
+        setTitle("Logisim-evolution");
+
+        // Set main layout panel
+        MainLayout mainLayout = new MainLayout();  // Assuming MainLayout exists in Swing
+        setContentPane(mainLayout);
+
+        // Load icons
+        loadIcons();
+
+        // Enable maximized window
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        // Handle Delete key press
+       
+
+        // Ensure key events work properly
+        setFocusable(true);
+        requestFocusInWindow();
+
+        // Default close operation
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Show window
+        setVisible(true);
+    }
+
+    private void loadIcons() {
+        int[] sizes = {16, 32, 48, 128, 256};
+        for (int size : sizes) {
+            String path = "/icons/logisim-icon-" + size + ".png";
+            ImageIcon icon = new ImageIcon(getClass().getResource(path));
+
+            if (icon.getImageLoadStatus() == MediaTracker.COMPLETE) {
+                setIconImage(icon.getImage());
+            } else {
+                System.err.println("Warning: Missing icon file: " + path);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(MainView::new);
+    }
+}

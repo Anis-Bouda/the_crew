@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<circuit>
+  <component>
+    <name>GENERATOR1745706161431</name>
+    <x>120</x>
+    <y>450</y>
+  </component>
+  <component>
+    <name>AND</name>
+    <x>710</x>
+    <y>370</y>
+  </component>
+  <component>
+    <name>OU</name>
+    <x>1010</x>
+    <y>390</y>
+  </component>
+  <component>
+    <name>GENERATOR1745706155656</name>
+    <x>90</x>
+    <y>220</y>
+  </component>
+  <component>
+    <name>NOT</name>
+    <x>390</x>
+    <y>240</y>
+  </component>
+</circuit>

@@ -1,0 +1,18 @@
+import java.awt.Dimension;
+import java.awt.Point;
+
+public class NOT extends AbstractComponent {
+
+    public NOT() {
+        super("NOT");
+        // Définir la taille du NOT, par exemple 100x60
+        setPreferredSize(new Dimension(100, 60));
+        // Positionner les ports relatifs (exemple) :
+        // Entrée en haut à gauche
+        inputPorts.add(new Point(10, getPreferredSize().height / 2));
+        // Sortie en haut à droite
+        outputPorts.add(new Point(getPreferredSize().width - 10, getPreferredSize().height / 2));
+    }
+    
+    // Vous pouvez ajouter ici d'autres comportements spécifiques au NOT
+}

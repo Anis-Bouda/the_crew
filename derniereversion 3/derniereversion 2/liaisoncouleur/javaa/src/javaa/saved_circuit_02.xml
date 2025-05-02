@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<circuit>
+  <component>
+    <name>saved_x</name>
+    <x>350</x>
+    <y>230</y>
+    <state>[TRUE]</state>
+  </component>
+  <component>
+    <name>GENERATOR1745672253856</name>
+    <x>230</x>
+    <y>220</y>
+    <state>[]</state>
+  </component>
+</circuit>

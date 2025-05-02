@@ -1,0 +1,237 @@
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Image;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+
+// 🔹 Create root node
+
+// 🔹 Create category nodes
+
+// 🔹 Add categories to root
+
+// 🔹 Add sub-components
+
+// 🔹 Create JTree
+
+// Add scrolling
+
+// 🔹 Add the tree to the panel
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+
+public class ComposantPanel extends JPanel {
+
+    public ComposantPanel() {
+        setLayout(new BorderLayout());
+
+        // 🔹 Create root node
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Composants");
+
+        // 🔹 Create category nodes
+        DefaultMutableTreeNode Gates = new DefaultMutableTreeNode("Gates");
+        DefaultMutableTreeNode Perxers = new DefaultMutableTreeNode("Perxers");
+        DefaultMutableTreeNode Memory = new DefaultMutableTreeNode("Memory");
+        DefaultMutableTreeNode Arithmetic = new DefaultMutableTreeNode("Arithmetic");
+        DefaultMutableTreeNode Wirray = new DefaultMutableTreeNode("Wirray");
+        // 🔹 Add categories to root
+        root.add(Gates);
+        root.add(Perxers);
+        root.add(Memory);
+        root.add(Arithmetic);
+        root.add(Wirray);
+        // 🔹 Add sub-components
+        Gates.add(new DefaultMutableTreeNode("NOT"));
+        Gates.add(new DefaultMutableTreeNode("OR"));
+        Gates.add(new DefaultMutableTreeNode("AND"));
+        Gates.add(new DefaultMutableTreeNode("BUFFER"));
+        Gates.add(new DefaultMutableTreeNode("NOR"));
+        Gates.add(new DefaultMutableTreeNode("XOR"));
+        Gates.add(new DefaultMutableTreeNode("XNOR"));
+        Gates.add(new DefaultMutableTreeNode("NAND"));
+        Gates.add(new DefaultMutableTreeNode("ODD PARITY"));
+        Gates.add(new DefaultMutableTreeNode("EVEN PARITY"));
+   
+      
+
+        Perxers.add(new DefaultMutableTreeNode("Multiplixer"));
+        Perxers.add(new DefaultMutableTreeNode("Demultiplixer"));
+        Perxers.add(new DefaultMutableTreeNode("Decoder"));
+        Perxers.add(new DefaultMutableTreeNode("Priory Encoder"));
+        Perxers.add(new DefaultMutableTreeNode("Bite Selector"));
+        
+
+        Memory.add(new DefaultMutableTreeNode("D flip flop"));
+        Memory.add(new DefaultMutableTreeNode("T flip flop"));
+        Memory.add(new DefaultMutableTreeNode("JK flip flop"));
+        Memory.add(new DefaultMutableTreeNode("RS flip flop"));
+        Memory.add(new DefaultMutableTreeNode("Register"));
+        Memory.add(new DefaultMutableTreeNode("Counter"));
+        Memory.add(new DefaultMutableTreeNode("RAM"));
+        Memory.add(new DefaultMutableTreeNode("ROM"));
+        
+        
+        Arithmetic.add(new DefaultMutableTreeNode("Adder"));
+        Arithmetic.add(new DefaultMutableTreeNode("Substractor"));
+        Arithmetic.add(new DefaultMutableTreeNode("Multiplayer"));
+        Arithmetic.add(new DefaultMutableTreeNode("Shifter"));
+        Arithmetic.add(new DefaultMutableTreeNode("Bite Adder"));
+        Arithmetic.add(new DefaultMutableTreeNode("Bite Finder"));
+        Arithmetic.add(new DefaultMutableTreeNode("Comparator"));
+        Arithmetic.add(new DefaultMutableTreeNode("Divider"));
+        Arithmetic.add(new DefaultMutableTreeNode("Negator"));
+        
+        
+        Wirray.add(new DefaultMutableTreeNode("Bin"));
+        Wirray.add(new DefaultMutableTreeNode("Prob"));
+        Wirray.add(new DefaultMutableTreeNode("Tunnel"));
+        Wirray.add(new DefaultMutableTreeNode("Clock"));
+        Wirray.add(new DefaultMutableTreeNode("Bull register "));
+       
+
+        // 🔹 Create JTree
+        JTree tree = new JTree(new DefaultTreeModel(root));
+        JScrollPane scrollPane = new JScrollPane(tree); // Add scrolling
+        scrollPane.setPreferredSize(new Dimension(300, 250));
+        tree.setCellRenderer(new ComposantTreeCellRenderer());
+        // 🔹 Add the tree to the panel
+        add(scrollPane, BorderLayout.CENTER);
+    }
+    
+ 
+    
+    static class ComposantTreeCellRenderer extends DefaultTreeCellRenderer {
+        private final Icon gatesIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon perxersIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon memoryIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon arithmeticIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon wirrayIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        
+        // 🔹 Icônes spécifiques pour les sous-composants
+        private final Icon andIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon orIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon xorIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon notIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon ramIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon romIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+       
+        final Icon registerIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon adderIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon subtractorIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon multiplierIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        private final Icon defaultIcon = new ImageIcon(getClass().getResource("/icons2/NOT.png"));
+        
+        private Icon resizeIcon(String path, int width, int height) {
+            ImageIcon originalIcon = new ImageIcon(getClass().getResource(path));
+            Image resizedImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(resizedImage);
+        }
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected,
+                                                      boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+            String nodeName = node.getUserObject().toString();
+
+            // 🔹 Appliquer des icônes spécifiques aux catégories
+            switch (nodeName) {
+                case "Gates":
+                	setIcon(resizeIcon("/icons2/NOT.png", 54, 54));
+                    break;
+                case "Perxers":
+                	setIcon(resizeIcon("/icons2/NOT.png", 54, 54));
+                    break;
+                case "Memory":
+                	setIcon(resizeIcon("/icons2/NOT.png", 54, 54));
+                    break;
+                case "Arithmetic":
+                	setIcon(resizeIcon("/icons2/NOT.png", 54, 54));
+                    break;
+                case "Wirray":
+                	setIcon(resizeIcon("/icons2/NOT.png", 54, 54));
+                    break;
+                // 🔹 Appliquer des icônes spécifiques aux sous-composants
+               
+                    
+                case "OR":
+                	setIcon(resizeIcon("/icons2/or.png", 54, 54));
+                    break;
+                case "BUFFER":
+                	setIcon(resizeIcon("/icons2/buffer.png", 54, 54));
+                    break;
+                case "AND":
+                	setIcon(resizeIcon("/icons2/and.png", 54, 54));
+                    break;
+                case "NOT":
+                	setIcon(resizeIcon("/icons2/not.png", 54, 54));
+                    break;
+              
+                case "NOR":
+                	setIcon(resizeIcon("/icons2/nor.png", 54, 54));
+                    break;
+                case "XOR":
+                	setIcon(resizeIcon("/icons2/xor.png", 54, 54));
+                    break;
+                case "NAND":
+                	setIcon(resizeIcon("/icons2/nand.png", 54, 54));
+                    break;
+                case "XNOR":
+                	setIcon(resizeIcon("/icons2/xnor.png", 54, 54));
+                    break;
+                case "ODD PARITY":
+                	setIcon(resizeIcon("/icons2/parity.png", 54, 54));
+                    break;
+                    
+                case "EVEN PARITY":
+                	setIcon(resizeIcon("/icons2/parity.png", 54, 54));
+                    break;
+                    
+                    
+                case "RAM": 
+                	setIcon(resizeIcon("/icons2/Capture_d_écran_2025-03-19_à_12.48.20-removebg-preview.png", 54, 54));
+                    break;
+                   
+                case "Demultiplixer":
+                	setIcon(resizeIcon("/icons2/demultiplixeur.png", 54, 54));
+                    break;
+                case "Decoder":
+                	setIcon(resizeIcon("/icons2/decoder.png", 54, 54));
+                    break;
+                case "Multiplixer":
+                	setIcon(resizeIcon("/icons2/multiplixeur.png", 54, 54));
+                    break;
+               
+                case "ROM":
+                	setIcon(resizeIcon("/icons2/bit.png", 54, 54));
+                    break;
+                case "Register":
+                	setIcon(resizeIcon("/icons2/bit.png", 54, 54));
+                    break;
+                case "Adder":
+                	setIcon(resizeIcon("/icons2/bit.png", 54, 54));
+                    break;
+              
+                    
+                case "Subtractor":
+                	setIcon(resizeIcon("/icons2/bit.png", 54, 54));
+                    break;
+                case "Multiplier":
+                	setIcon(resizeIcon("/icons2/bit.png", 54, 54));
+                    break;
+                default:
+                	setIcon(resizeIcon("/icons2/bit.png", 54, 54)); // Icône par défaut pour les autres éléments
+                    break;
+            }
+
+            return this;
+        }
+    }
+
+}

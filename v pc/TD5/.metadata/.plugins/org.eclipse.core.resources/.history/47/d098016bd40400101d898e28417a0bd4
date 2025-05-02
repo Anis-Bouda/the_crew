@@ -1,0 +1,39 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+public class CustomCanvas extends JPanel {
+    
+    private int mouseX = -1, mouseY = -1; // Coordonnées de la souris
+
+    public CustomCanvas() {
+        setBackground(Color.WHITE); // Fond blanc comme Logisim
+
+        // 🎯 Capturer les clics pour enregistrer la position
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mouseX = e.getX();
+                mouseY = e.getY();
+                repaint(); // Redessiner après le clic
+            }
+        });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        // ✅ Activer l'anti-aliasing pour un dessin fluide
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // ✍️ Dessiner un texte aux coordonnées cliquées
+        if (mouseX != -1 && mouseY != -1) {
+            g2d.setColor(Color.RED);
+            g2d.setFont(new Font("Arial", Font.BOLD, 16));
+            g2d.drawString("X: " + mouseX + ", Y: " + mouseY, mouseX, mouseY);
+        }
+    }
+}

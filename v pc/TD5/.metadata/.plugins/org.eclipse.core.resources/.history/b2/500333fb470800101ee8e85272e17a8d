@@ -1,0 +1,171 @@
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URL;
+import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.*;
+
+public class ComposantPanel extends JPanel {
+    private String activeTool = "None";
+    private JTree tree; // Déclare l'arbre au niveau de la classe
+
+    public ComposantPanel() {
+        setLayout(new BorderLayout());
+
+        // 🔹 Création du nœud racine
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Composants");
+
+        // 🔹 Création des catégories
+        DefaultMutableTreeNode Gates = new DefaultMutableTreeNode("Gates");
+        DefaultMutableTreeNode Perxers = new DefaultMutableTreeNode("Perxers");
+        DefaultMutableTreeNode Memory = new DefaultMutableTreeNode("Memory");
+        DefaultMutableTreeNode Arithmetic = new DefaultMutableTreeNode("Arithmetic");
+        DefaultMutableTreeNode Wirray = new DefaultMutableTreeNode("Wirray");
+
+        // 🔹 Ajout des catégories au nœud racine
+        root.add(Gates);
+        root.add(Perxers);
+        root.add(Memory);
+        root.add(Arithmetic);
+        root.add(Wirray);
+
+        // 🔹 Ajout des sous-composants
+        Gates.add(new DefaultMutableTreeNode("NOT"));
+        Gates.add(new DefaultMutableTreeNode("OR"));
+        Gates.add(new DefaultMutableTreeNode("AND"));
+        Gates.add(new DefaultMutableTreeNode("BUFFER"));
+        Gates.add(new DefaultMutableTreeNode("NOR"));
+        Gates.add(new DefaultMutableTreeNode("XOR"));
+        Gates.add(new DefaultMutableTreeNode("XNOR"));
+        Gates.add(new DefaultMutableTreeNode("NAND"));
+
+        Perxers.add(new DefaultMutableTreeNode("Multiplexer"));
+        Perxers.add(new DefaultMutableTreeNode("Demultiplexer"));
+        Perxers.add(new DefaultMutableTreeNode("Decoder"));
+
+        Memory.add(new DefaultMutableTreeNode("D flip flop"));
+        Memory.add(new DefaultMutableTreeNode("T flip flop"));
+
+        Arithmetic.add(new DefaultMutableTreeNode("Adder"));
+        Arithmetic.add(new DefaultMutableTreeNode("Subtractor"));
+
+        // 🔹 Ajout des outils Wirray avec noms corrigés
+        Wirray.add(new DefaultMutableTreeNode("Poke Tool"));
+        Wirray.add(new DefaultMutableTreeNode("Edit Tool"));  // ✅ Suppression de l’espace en trop
+        Wirray.add(new DefaultMutableTreeNode("Select Tool"));
+        Wirray.add(new DefaultMutableTreeNode("Writing Tool"));
+        Wirray.add(new DefaultMutableTreeNode("Text Tool"));
+        Wirray.add(new DefaultMutableTreeNode("OutPut"));
+
+        // 🔹 Création de l'arbre JTree
+        tree = new JTree(new DefaultTreeModel(root));
+
+        // 🎯 Ajout du listener pour détecter le clic sur un élément
+        tree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = tree.getRowForLocation(e.getX(), e.getY());
+                if (row == -1) return; // Aucun élément sélectionné
+
+                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+                if (selectedNode == null || !selectedNode.isLeaf()) return; // Ignore les catégories
+
+                String nodeName = selectedNode.getUserObject().toString();
+
+                // Vérifier si l'élément cliqué appartient à "Wirray"
+                switch (nodeName) {
+                    case "Poke Tool" -> activatePokeTool();
+                    case "Edit Tool" -> activateEditTool();
+                    case "Select Tool" -> activateSelectTool();
+                    case "Writing Tool" -> activateWritingTool();
+                    case "Text Tool" -> activateTextTool();
+                    case "OutPut" -> activateOutputTool();
+                }
+
+                System.out.println("Outil activé : " + nodeName);
+            }
+        });
+
+        // 🔹 Active le glisser-déposer sur l'arbre
+        tree.setDragEnabled(true);
+        tree.setTransferHandler(new TransferHandler() {
+            @Override
+            public int getSourceActions(JComponent c) {
+                return COPY;
+            }
+
+            @Override
+            protected Transferable createTransferable(JComponent c) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+                if (node == null) return null;
+                return new StringSelection(node.getUserObject().toString());
+            }
+        });
+
+        tree.setCellRenderer(new ComposantTreeCellRenderer());
+
+        // 🔹 Ajout du défilement
+        JScrollPane scrollPane = new JScrollPane(tree);
+        scrollPane.setPreferredSize(new Dimension(300, 250));
+
+        // 🔹 Ajout de l'arbre au panneau
+        add(scrollPane, BorderLayout.CENTER);
+    }
+
+    // 🔥 Ajout des outils avec changement de curseur
+    private void activatePokeTool() {
+        activeTool = "Poke Tool";
+        tree.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // 🖐 Curseur main
+    }
+
+    private void activateEditTool() {
+        activeTool = "Edit Tool";
+        tree.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)); // 📝 Curseur texte
+    }
+
+    private void activateSelectTool() {
+        activeTool = "Select Tool";
+        tree.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)); // 🎯 Curseur croix
+    }
+
+    private void activateWritingTool() {
+        activeTool = "Writing Tool";
+        tree.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)); // 🖊️ Curseur texte
+    }
+
+    private void activateTextTool() {
+        activeTool = "Text Tool";
+        tree.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)); // ✏️ Curseur texte
+    }
+
+    private void activateOutputTool() {
+        activeTool = "OutPut";
+        tree.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); // 🔄 Curseur normal
+    }
+
+    // 🔹 Classe interne pour personnaliser l'affichage des icônes
+    static class ComposantTreeCellRenderer extends DefaultTreeCellRenderer {
+        private Icon resizeIcon(String path, int width, int height) {
+            URL resource = getClass().getResource(path);
+            if (resource == null) {
+                System.err.println("⚠️ Image not found: " + path);
+                return new ImageIcon();
+            }
+
+            ImageIcon originalIcon = new ImageIcon(resource);
+            Image resizedImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(resizedImage);
+        }
+
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected,
+                                                      boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+            return this;
+        }
+    }
+}

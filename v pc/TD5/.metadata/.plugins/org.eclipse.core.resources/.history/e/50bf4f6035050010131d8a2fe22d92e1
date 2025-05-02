@@ -1,0 +1,63 @@
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class AbstractComponent extends JPanel {
+    // On force l'utilisation de java.awt.Point pour éviter les conflits avec votre classe custom
+    protected List<java.awt.Point> inputPorts = new ArrayList<>();
+    protected List<java.awt.Point> outputPorts = new ArrayList<>();
+
+    protected String componentName;
+
+    public AbstractComponent(String componentName) {
+        this.componentName = componentName;
+        // Par défaut, on définit une taille (modifiable par les sous-classes)
+        setPreferredSize(new Dimension(100, 60));
+        setBackground(Color.WHITE);
+        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setLayout(null);
+    }
+
+    public String getComponentName() {
+        return componentName;
+    }
+
+    /**
+     * Méthode à appeler pour mettre à jour les positions des ports sur les bords du composant.
+     * Par exemple, on place les ports d'entrée sur le bord gauche et les ports de sortie sur le bord droit.
+     */
+    protected void updatePortPositions() {
+        int width = getWidth();
+        int height = getHeight();
+
+        // Si au moins un port d'entrée est présent, on le place au centre gauche
+        if (!inputPorts.isEmpty()) {
+            inputPorts.set(0, new java.awt.Point(0, height / 2));
+        }
+
+        // Si au moins un port de sortie est présent, on le place au centre droit
+        if (!outputPorts.isEmpty()) {
+            outputPorts.set(0, new java.awt.Point(width, height / 2));
+        }
+    }
+
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        // Avant de dessiner, mettre à jour la position des ports
+        updatePortPositions();
+        
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(Color.BLUE);
+        // Dessiner les entrées
+        for (java.awt.Point p : inputPorts) {
+            g2d.fillOval(p.x - 5, p.y - 5, 10, 10);
+        }
+        // Dessiner les sorties
+        for (java.awt.Point p : outputPorts) {
+            g2d.fillOval(p.x - 5, p.y - 5, 10, 10);
+        }
+    }
+}

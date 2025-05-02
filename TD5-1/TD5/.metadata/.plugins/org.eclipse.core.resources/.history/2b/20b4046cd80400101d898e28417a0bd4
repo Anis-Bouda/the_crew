@@ -1,0 +1,74 @@
+import java.awt.BorderLayout;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+
+public class CustomCanvas extends JPanel {
+
+    public DragDropTree() {
+        setLayout(new BorderLayout());
+
+        // 🔹 Création du modèle de l'arbre
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Composants");
+        DefaultMutableTreeNode gates = new DefaultMutableTreeNode("Gates");
+        DefaultMutableTreeNode andGate = new DefaultMutableTreeNode("AND");
+        DefaultMutableTreeNode orGate = new DefaultMutableTreeNode("OR");
+        gates.add(andGate);
+        gates.add(orGate);
+        root.add(gates);
+
+        // 🔹 Création du JTree
+        JTree tree = new JTree(root);
+        tree.setDragEnabled(true); // Activer le Drag & Drop
+        tree.setTransferHandler(new TreeTransferHandler()); // Gestion du transfert
+
+        // 🔹 Ajout du JTree à un JScrollPane pour le défilement
+        JScrollPane scrollPane = new JScrollPane(tree);
+        add(scrollPane, BorderLayout.CENTER);
+
+        // 🔹 Ajout d'un padding pour l'esthétique
+        setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    }
+
+    // 📌 Gestionnaire de transfert pour le Drag & Drop
+    static class TreeTransferHandler extends TransferHandler {
+        @Override
+        protected Transferable createTransferable(JComponent c) {
+            JTree tree = (JTree) c;
+            TreePath path = tree.getSelectionPath();
+            if (path != null) {
+                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+                if (selectedNode.isLeaf()) { // On ne peut déplacer que les feuilles
+                    return new StringSelection(selectedNode.toString());
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public int getSourceActions(JComponent c) {
+            return COPY; // Permet uniquement la copie des éléments
+        }
+    }
+
+    // 🏠 Fenêtre principale pour tester
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Drag & Drop JTree");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(400, 300);
+            frame.add(new DragDropTree());
+            frame.setVisible(true);
+        });
+    }
+}

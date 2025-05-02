@@ -1,0 +1,35 @@
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+
+public class Comparator extends AbstractComponent {
+    private final int width = 40;
+    private final int height = 40;
+    private final int offsetY = 5;
+
+    public Comparator() {
+        super("COMPARATOR", 2, 1);
+        setOpaque(false);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+        g2.setStroke(new BasicStroke(2));
+        g2.setColor(Color.BLACK);
+
+        int x = 8, y = 4 + offsetY;
+        int w = width, h = height;
+
+        g2.drawPolygon(new int[]{x, x + w, x, x}, new int[]{y, y + h / 2, y + h, y}, 4);
+        g2.drawLine(x - 15, y + (int)(0.3 * h), x, y + (int)(0.3 * h));
+        g2.drawLine(x - 15, y + (int)(0.7 * h), x, y + (int)(0.7 * h));
+        g2.drawLine(x + w, y + h / 2, x + w + 20, y + h / 2);
+    }
+}

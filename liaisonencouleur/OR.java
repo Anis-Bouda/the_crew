@@ -1,0 +1,51 @@
+public class OR extends Composant {
+
+	    public OR(String id,int x, int y)
+	    {
+	        super(id,x,y);
+	        this.addInput(State.UNKNOWN);
+	        this.addInput(State.UNKNOWN);
+	        this.addOutput(State.UNKNOWN);
+	    }
+
+	    @Override
+	    public void evaluate()
+	    {
+	        if (this.inputs.size() == 2 && this.outputs.size()==1)
+	        {
+	            State input1=this.inputs.get(0);
+	            State input2=this.inputs.get(1);
+	            State output;
+	            System.out.println("💡 OR " + id + " inputs = " + inputs);
+	            if(input1==State.ERROR || input2==State.ERROR)
+	            {
+	                output=State.ERROR;
+	            }
+	            else
+	            {
+	                if(input1==State.UNKNOWN && input2==State.UNKNOWN)
+	                {
+	                    output=State.UNKNOWN;
+	                }
+	                else
+	                {
+	                    if(input1==State.True || input2==State.True)
+	                    {
+	                        output=State.True;
+	                    }
+	                    else
+	                    {    
+	                        output=State.False;
+	                    }
+	                }
+	            }
+	            this.outputs.set(0,output);
+	            this.state=output;
+	            System.out.println("💡 OR " + id + " outputs= " + inputs);
+	        }
+	        else
+	        {
+	            throw new IllegalStateException("Erreur d'évaluation : La porte OU doit avoir exactement 2 inputs et 1 output.");
+	        }
+	    }
+	}

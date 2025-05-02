@@ -1,0 +1,60 @@
+import javax.swing.JLayeredPane;
+import java.awt.Point;
+
+public class ConnectionManager {
+    private static AbstractComponent selectedComponent;
+    private static String selectedPortType; // "input" ou "output"
+    private static int selectedPortIndex;
+    private static Point selectedGlobalPoint;
+    private static JLayeredPane layeredPane;
+
+    public static void setLayeredPane(JLayeredPane pane) {
+        layeredPane = pane;
+    }
+
+    public static void portClicked(AbstractComponent comp, String portType, int portIndex, Point globalPoint) {
+        if (selectedComponent == null) {
+            // Premier port sélectionné
+            selectedComponent = comp;
+            selectedPortType = portType;
+            selectedPortIndex = portIndex;
+            selectedGlobalPoint = globalPoint;
+            System.out.println("Premier port sélectionné (" + portType + ")");
+        } else {
+            // Vérifier que les types sont complémentaires et que ce n'est pas le même composant
+            if (!selectedPortType.equals(portType) && selectedComponent != comp) {
+                Point start, end;
+                // Définir l’orientation de la connexion : on veut toujours aller de la sortie vers l’entrée
+                if (selectedPortType.equals("output") && portType.equals("input")) {
+                    start = selectedGlobalPoint;
+                    end = globalPoint;
+                } else if (selectedPortType.equals("input") && portType.equals("output")) {
+                    start = globalPoint;
+                    end = selectedGlobalPoint;
+                } else {
+                    // En cas d’incompatibilité (théoriquement impossible ici)
+                    reset();
+                    return;
+                }
+                // Créer la ligne de connexion
+                Ligne line = new Ligne();
+                
+                // Placer la ligne sur toute la zone de conception
+                line.setBounds(0, 0, layeredPane.getWidth(), layeredPane.getHeight());
+                line.setOpaque(false);
+                line.setConnection(start, end);
+                layeredPane.add(line, Integer.valueOf(1)); // On l'ajoute sur un calque approprié
+                layeredPane.repaint();
+                System.out.println("Connexion créée !");
+            }
+            reset();
+        }
+    }
+
+    public static void reset() {
+        selectedComponent = null;
+        selectedPortType = null;
+        selectedPortIndex = -1;
+        selectedGlobalPoint = null;
+    }
+}

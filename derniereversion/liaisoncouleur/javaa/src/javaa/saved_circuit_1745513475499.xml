@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<circuit>
+  <component>
+    <name>GENERATOR1745513459110</name>
+    <x>130</x>
+    <y>290</y>
+  </component>
+  <component>
+    <name>NOT</name>
+    <x>630</x>
+    <y>280</y>
+  </component>
+</circuit>

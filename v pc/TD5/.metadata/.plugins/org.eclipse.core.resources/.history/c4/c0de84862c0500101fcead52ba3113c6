@@ -1,0 +1,147 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Point extends JPanel {
+	private Consumer<java.awt.Point> onMoveListener;
+    // Espacement des points dans la grille
+    private static final int DOT_SPACING = 10;  // Espacement entre les points
+    private static final int SQUARE_SIZE = 50;  // Taille du carré
+
+    private int squareX, squareY;  // Position du carré
+    private int mouseX, mouseY;  // Position de la souris lors du clic
+    private boolean dragging = false;  // Si le carré est en train d'être déplacé
+
+    private List<int[]> lignes = new ArrayList<>(); // Liste des lignes tracées
+    private int startX = -1, startY = -1, endX = -1, endY = -1;
+    private boolean drawing = false; // Indique si une ligne est en cours de dessin
+
+    public Point() {
+        // Initialiser la position du carré
+        squareX = (getWidth() - SQUARE_SIZE) / 2;
+        squareY = (getHeight() - SQUARE_SIZE) / 2;
+
+        setBackground(Color.WHITE);
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // Gestion du carré
+                if (e.getX() >= squareX && e.getX() <= squareX + SQUARE_SIZE &&
+                    e.getY() >= squareY && e.getY() <= squareY + SQUARE_SIZE) {
+                    dragging = true;
+                    mouseX = e.getX() - squareX;
+                    mouseY = e.getY() - squareY;
+                } 
+                // Gestion du tracé de ligne
+                else {
+                    if (!drawing) {
+                        // Premier clic : initialiser la ligne
+                        startX = alignToGrid(e.getX());
+                        startY = alignToGrid(e.getY());
+                        endX = startX;
+                        endY = startY;
+                        drawing = true;
+                    } else {
+                        // Deuxième clic : on termine le tracé
+                        lignes.add(new int[]{startX, startY, endX, endY});
+                        drawing = false;
+                    }
+                    repaint();
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                dragging = false;
+            }
+        });
+
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (dragging) {
+                    squareX = e.getX() - mouseX;
+                    squareY = e.getY() - mouseY;
+                    repaint();
+                }
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (drawing) {
+                    endX = alignToGrid(e.getX());
+                    endY = alignToGrid(e.getY());
+                    repaint();
+                }
+            }
+        });
+    }
+
+    // Fonction pour aligner un point sur la grille
+    private int alignToGrid(int coord) {
+        return Math.round((float) coord / DOT_SPACING) * DOT_SPACING;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        // Dessin de la grille de points
+        g2d.setColor(Color.LIGHT_GRAY);
+        int width = getWidth();
+        int height = getHeight();
+        for (int x = 0; x < width; x += DOT_SPACING) {
+            for (int y = 0; y < height; y += DOT_SPACING) {
+                g2d.fillOval(x - 1, y - 1, 3, 3); // Ajustement du point pour bien s'aligner
+            }
+        }
+
+        // Dessin du carré rouge
+        g2d.setColor(Color.RED);
+        g2d.setStroke(new BasicStroke(3));
+        g2d.drawRect(squareX, squareY, SQUARE_SIZE, SQUARE_SIZE);
+
+        // Dessin des lignes enregistrées
+        g2d.setColor(Color.BLUE);
+        g2d.setStroke(new BasicStroke(3));
+        for (int[] ligne : lignes) {
+            drawLine(g2d, ligne[0], ligne[1], ligne[2], ligne[3]);
+        }
+
+        // Dessin de la ligne en cours de tracé
+        if (drawing) {
+            drawLine(g2d, startX, startY, endX, endY);
+        }
+    }
+
+    // Fonction pour dessiner une ligne (horizontal, vertical, ou diagonale)
+    private void drawLine(Graphics2D g2d, int x1, int y1, int x2, int y2) {
+        // Si la ligne est horizontale
+        if (y1 == y2) {
+            g2d.drawLine(x1, y1, x2, y2);
+        }
+        // Si la ligne est verticale
+        else if (x1 == x2) {
+            g2d.drawLine(x1, y1, x2, y2);
+        }
+        // Si la ligne est diagonale
+        else {
+            // Tracer un segment horizontal vers x2
+            g2d.drawLine(x1, y1, x2, y1);
+            // Tracer un segment vertical vers y2
+            g2d.drawLine(x2, y1, x2, y2);
+        }
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Carré et lignes interactives");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(500, 500);
+        frame.add(new Point());
+        frame.setVisible(true);
+    }
+}

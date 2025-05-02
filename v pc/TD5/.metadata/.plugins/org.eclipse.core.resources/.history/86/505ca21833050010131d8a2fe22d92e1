@@ -1,0 +1,46 @@
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+
+public abstract class AbstractComponent extends JPanel {
+    protected List<Point> inputPorts;   // positions relatives des entrées
+    protected List<Point> outputPorts;  // positions relatives des sorties
+    protected String componentName;
+
+    public AbstractComponent(String componentName) {
+        this.componentName = componentName;
+        inputPorts = new ArrayList<>();
+        outputPorts = new ArrayList<>();
+        // Par défaut, on peut définir une taille de composant (modifiable par les sous-classes)
+        setPreferredSize(new Dimension(100, 60));
+        setBackground(Color.WHITE);
+        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setLayout(null);
+    }
+
+    public String getComponentName() {
+        return componentName;
+    }
+
+    // Méthode pour dessiner les ports (entrées et sorties)
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(Color.BLUE);
+        // Dessiner les entrées
+        for (Point p : inputPorts) {
+            g2d.fillOval(p.getX() - 5, p.getY() - 5, 10, 10);
+        }
+        // Dessiner les sorties
+        for (Point p : outputPorts) {
+            g2d.fillOval(p.getX() - 5, p.getY() - 5, 10, 10);
+        }
+    }
+}

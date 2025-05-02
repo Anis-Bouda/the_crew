@@ -1,0 +1,35 @@
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
+public class MainView extends JFrame {
+
+    public MainView() {
+        // Set window title
+        setTitle("Logisim-evolution");
+
+        // Set main layout panel
+        MainLayout mainLayout = new MainLayout();
+        setContentPane(mainLayout);
+
+        // Set menu bar
+        setJMenuBar(mainLayout.createMenuBar());
+
+        // Enable maximized window
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        // Ensure key events work properly
+        setFocusable(true);
+        requestFocusInWindow();
+
+        // Default close operation
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Show window
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(MainView::new);
+        UIManager.setLookAndFeel( new NimbusLookAndFeel() );
+    }
+}

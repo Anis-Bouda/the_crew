@@ -1,0 +1,76 @@
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class AbstractComponent extends JPanel {
+    protected List<java.awt.Point> inputPorts = new ArrayList<>();
+    protected List<java.awt.Point> outputPorts = new ArrayList<>();
+    protected String componentName;
+    public AbstractComponent(String componentName, int numInputs, int numOutputs) {
+        setPreferredSize(new Dimension(100, 60));
+        setBackground(Color.WHITE);
+        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setLayout(null);
+
+        // Positionnement automatique des ports
+        int height = getPreferredSize().height;
+        int width = getPreferredSize().width;
+
+        // Calcul des positions des ports d'entrée
+        for (int i = 0; i < numInputs; i++) {
+            int yPos = (i + 1) * height / (numInputs + 1); // Répartir les entrées uniformément
+            inputPorts.add(new java.awt.Point(0, yPos));
+        }
+
+        // Calcul des positions des ports de sortie
+        for (int i = 0; i < numOutputs; i++) {
+            int yPos = (i + 1) * height / (numOutputs + 1);
+            outputPorts.add(new java.awt.Point(width, yPos));
+        }
+    }
+    
+    public AbstractComponent(String componentName, int numInputs, int numOutputs) {
+        this.componentName = componentName;
+    }
+
+    public String constructComponentName() {
+        return componentName + "_" + hashCode(); // Exemple de construction de nom unique
+    }
+}
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.BLACK);
+        g.drawRect(0, 0, getWidth(), getHeight());
+
+        // Dessin des ports d'entrée
+        g.setColor(Color.RED);
+        for (java.awt.Point p : inputPorts) {
+            g.fillOval(p.x - 5, p.y - 5, 10, 10);
+        }
+
+        // Dessin des ports de sortie
+        g.setColor(Color.GREEN);
+        for (java.awt.Point p : outputPorts) {
+            g.fillOval(p.x - 5, p.y - 5, 10, 10);
+        }
+    }
+
+    public List<java.awt.Point> getInputPorts() {
+        List<java.awt.Point> globalPositions = new ArrayList<>();
+        for (java.awt.Point p : inputPorts) {
+            globalPositions.add(new java.awt.Point(getX() + p.x, getY() + p.y));
+        }
+        return globalPositions;
+    }
+
+    public List<java.awt.Point> getOutputPorts() {
+        List<java.awt.Point> globalPositions = new ArrayList<>();
+        for (java.awt.Point p : outputPorts) {
+            globalPositions.add(new java.awt.Point(getX() + p.x, getY() + p.y));
+        }
+        return globalPositions;
+    }
+}

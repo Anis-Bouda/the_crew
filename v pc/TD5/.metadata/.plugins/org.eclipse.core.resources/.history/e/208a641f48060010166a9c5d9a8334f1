@@ -1,0 +1,121 @@
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JPanel;
+
+public class Ligne extends JPanel {
+    // Stocke toutes les lignes dessinées (libres ou connexions)
+    private List<LineSegment> segments = new ArrayList<>();
+    // Segment en cours de dessin (mode libre)
+    private LineSegment currentSegment;
+    private boolean drawing = false;
+
+    public Ligne() {
+        setBackground(Color.WHITE);
+
+        // Gestion du dessin libre avec la souris
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // Démarrage du dessin libre
+                if (!drawing) {
+                    currentSegment = new LineSegment(e.getPoint(), e.getPoint(), false);
+                    drawing = true;
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (drawing && currentSegment != null) {
+                    currentSegment.end = e.getPoint();
+                    segments.add(currentSegment);
+                    currentSegment = null;
+                    drawing = false;
+                    repaint();
+                    System.out.println("Ligne libre créée !");
+                }
+            }
+        });
+
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (drawing && currentSegment != null) {
+                    currentSegment.end = e.getPoint();
+                    repaint();
+                }
+            }
+        });
+    }
+
+    /**
+     * Ajoute une ligne de connexion avec coude.
+     * La ligne est ajoutée à la liste des segments et reste affichée.
+     * Après l'ajout, l'utilisateur peut reprendre le dessin libre.
+     *
+     * @param start Le point de départ de la connexion (global)
+     * @param end Le point d'arrivée de la connexion (global)
+     */
+    public void setConnection(Point start, Point end) {
+        segments.add(new LineSegment(start, end, true));
+        // Réinitialisation de l'état libre pour permettre la reprise du dessin
+        currentSegment = null;
+        drawing = false;
+        repaint();
+        System.out.println("Connexion créée !");
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.BLUE);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(3));
+
+        // Dessiner tous les segments sauvegardés
+        for (LineSegment seg : segments) {
+            drawSegment(g, seg);
+        }
+
+        // Dessiner le segment en cours (mode libre)
+        if (currentSegment != null) {
+            drawSegment(g, currentSegment);
+        }
+    }
+
+    /**
+     * Méthode de dessin d'un segment.
+     * Si le segment n'est pas aligné horizontalement ou verticalement, on dessine un coude :
+     * un segment horizontal puis un segment vertical.
+     */
+    private void drawSegment(Graphics g, LineSegment seg) {
+        if (seg.start.x != seg.end.x && seg.start.y != seg.end.y) {
+            // Dessin en coude : d'abord horizontal, puis vertical
+            g.drawLine(seg.start.x, seg.start.y, seg.end.x, seg.start.y);
+            g.drawLine(seg.end.x, seg.start.y, seg.end.x, seg.end.y);
+        } else {
+            // Dessin d'une ligne droite si les points sont alignés
+            g.drawLine(seg.start.x, seg.start.y, seg.end.x, seg.end.y);
+        }
+    }
+
+    // Classe interne pour représenter un segment de ligne
+    private static class LineSegment {
+        Point start;
+        Point end;
+        // isConnection vaut true pour une ligne de connexion (bien qu'ici le dessin en coude soit appliqué pour tous)
+        boolean isConnection;
+
+        public LineSegment(Point start, Point end, boolean isConnection) {
+            this.start = start;
+            this.end = end;
+            this.isConnection = isConnection;
+        }
+    }
+}

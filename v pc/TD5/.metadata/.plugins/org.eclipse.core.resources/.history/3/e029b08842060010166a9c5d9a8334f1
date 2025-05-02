@@ -1,0 +1,70 @@
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JPanel;
+
+public class Ligne extends JPanel {
+    private java.awt.Point start;
+    private java.awt.Point end;
+    private boolean drawing = false;
+
+    public Ligne() {
+        setBackground(Color.WHITE);
+        
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                start = e.getPoint();
+                drawing = true;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                end = e.getPoint();
+                drawing = false;
+                repaint();
+                System.out.println("Connexion créée !");
+            }
+        });
+
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                end = e.getPoint();
+                repaint();
+            }
+        });
+    }
+
+    public void setConnection(java.awt.Point start, java.awt.Point end) {
+        this.start = start;
+        this.end = end;
+        repaint();
+    }
+
+    @Override
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.BLUE);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(3));
+
+        if (start != null && end != null) {
+            // Si les deux points ne sont pas alignés, dessiner un coude
+            if (start.x != end.x && start.y != end.y) {
+                // Option 1 : segment horizontal puis vertical
+                // Vous pouvez aussi choisir de dessiner vertical puis horizontal en fonction de vos préférences.
+                g.drawLine(start.x, start.y, end.x, start.y);
+                g.drawLine(end.x, start.y, end.x, end.y);
+            } else {
+                g.drawLine(start.x, start.y, end.x, end.y);
+            }
+        }
+    }
+
+}

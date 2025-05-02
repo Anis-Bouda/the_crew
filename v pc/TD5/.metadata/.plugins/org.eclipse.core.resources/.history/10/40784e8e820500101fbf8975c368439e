@@ -1,0 +1,10 @@
+import java.awt.Dimension;
+
+public class NOT extends AbstractComponent {
+    public NOT() {
+        super("NOT");
+        setPreferredSize(new Dimension(100, 60));
+        inputPorts.add(new java.awt.Point(0, 0));
+        outputPorts.add(new java.awt.Point(0, 0));
+    }
+}
