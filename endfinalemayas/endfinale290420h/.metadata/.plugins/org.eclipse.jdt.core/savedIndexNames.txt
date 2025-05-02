@@ -1,3 +1,0 @@
-INDEX VERSION 1.134+C:\Users\Mayas\Desktop\endfinale290420h\.metadata\.plugins\org.eclipse.jdt.core
-2559299657.index
-1865797976.index

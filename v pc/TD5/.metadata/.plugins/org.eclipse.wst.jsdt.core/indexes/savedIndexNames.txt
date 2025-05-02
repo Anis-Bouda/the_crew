@@ -1,5 +1,0 @@
-INDEX VERSION 1.4+C:\Users\Mayas\Desktop\LastProject\TD5\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
-102435675.index
-2356529378.index
-2637707197.index
-2275235426.index
