@@ -8,9 +8,9 @@ Il existe plusieurs versions qui ont été poussées, et d'autres le seront à l
 *(Certaines versions sont obsolètes et ne fonctionnent pas. Elles sont simplement conservées pour illustrer d’anciennes approches ou choix de conception.)*
 
 # Détails des versions du projet :
-**********************************************************************************************************************************************************************************
-* + **Archsimule** -----------> Version Finale compilable et exécutable, pour compiler on fait **make** ou **make compile**  pour executer **make Archsimule** ou **make run**   *
-**********************************************************************************************************************************************************************************
+*****************************************************************************************************************************************************************************************************************************
+* + **Archsimule** -----------> Version Finale compilable et exécutable, pour compiler on fait **make** ou **make compile**  pour executer **make Archsimule** ou **make run** pour effacer lmes executables **make clean** *
+*****************************************************************************************************************************************************************************************************************************
 
 + **Test** -----------> Répertoire contenant les tests unitaires des classes logiques.
 
