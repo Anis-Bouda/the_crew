@@ -51,41 +51,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import GRAPHIQUE_IG.Adder_ig;
-import GRAPHIQUE_IG.BITSELECTOR_ig;
-import GRAPHIQUE_IG.BJK_ig;
-import GRAPHIQUE_IG.BRS_ig;
-import GRAPHIQUE_IG.BUFFER_ig;
-import GRAPHIQUE_IG.BasculeD_ig;
-import GRAPHIQUE_IG.BasculeT_ig;
-import GRAPHIQUE_IG.BitAdder_ig;
-import GRAPHIQUE_IG.BitFinder_ig;
-import GRAPHIQUE_IG.CMPT_ig;
-import GRAPHIQUE_IG.Clock_ig;
-import GRAPHIQUE_IG.Comparator_ig;
-import GRAPHIQUE_IG.DECODER_ig;
-import GRAPHIQUE_IG.DEMUX_ig;
-import GRAPHIQUE_IG.Divider_ig;
-import GRAPHIQUE_IG.ENCODER_ig;
-import GRAPHIQUE_IG.ET_ig;
-import GRAPHIQUE_IG.EVEN_ig;
-import GRAPHIQUE_IG.Ground_ig;
-import GRAPHIQUE_IG.LED_ig;
-import GRAPHIQUE_IG.MUX_ig;
-import GRAPHIQUE_IG.NAND_ig;
-import GRAPHIQUE_IG.NOR_ig;
-import GRAPHIQUE_IG.NOT_ig;
-import GRAPHIQUE_IG.Negator_ig;
-import GRAPHIQUE_IG.ODD_ig;
-import GRAPHIQUE_IG.OR_ig;
-import GRAPHIQUE_IG.Power_ig;
-import GRAPHIQUE_IG.RAM_ig;
-import GRAPHIQUE_IG.ROM_ig;
-import GRAPHIQUE_IG.Shifter_ig;
-import GRAPHIQUE_IG.Subtractor_ig;
-import GRAPHIQUE_IG.XNOR_ig;
-import GRAPHIQUE_IG.XOR_ig;
+import GRAPHIQUE_IG.*;
+import Logique.Principale.Composant;
 import Logique.Principale.State;
+
+
+/*les imports pour la création du circuit */
+import java.util.List;
+import java.util.ArrayList;
+
+/*les imports pours les fonctions copier et coller */
+import javax.swing.AbstractAction;
+import javax.swing.InputMap;
+import javax.swing.ActionMap;
+import java.awt.MouseInfo;
+import javax.swing.SwingUtilities;
 
 // Note : Ne pas importer java.awt.Point ici pour éviter le conflit avec votre classe custom Point
 	//
@@ -189,6 +169,112 @@ public class MainLayout extends JPanel {
             panelPositions.put(pointPanel, newPosition);
 
         });
+
+          /*l'ajout du raccourcis Clavier Ctrl+Z pour arreter l'exécution  */
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK), "stop");
+	actionMap.put("stop", new AbstractAction()
+	{
+    		@Override
+    		public void actionPerformed(ActionEvent e) {
+        	circuit.stop();
+    		}
+	});
+               /*l'ajout des raccourcis Clavier Ctrl+C et Ctrl+V pour copier et coller*/
+        /* Copier le composant sélectionné avec CTRL + C*/
+	inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK), "copy");
+	actionMap.put("copy", new AbstractAction()
+	{
+    		@Override
+    		public void actionPerformed(ActionEvent e) {
+        	if (selectedComponent != null) {
+        	    copiedComponent = 	selectedComponent.cloneComponent();
+            if (copiedComponent == null) {
+                    System.err.println("Erreur : le composant cloné est null !");
+            } else {
+                    System.out.println("Copier action triggered!");
+            }
+
+
+        	}
+    		}
+	});
+
+
+
+        /*Coller le composant copié avec CTRL + V*/
+	    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK), "paste");
+	    actionMap.put("paste", new AbstractAction() {
+    	@Override
+    	public void actionPerformed(ActionEvent e) {
+        	if (copiedComponent != null) {
+                AbstractComponent newComp = copiedComponent.cloneComponent();
+                System.out.println("Coller action triggered!");
+		newComp.setSize(newComp.getPreferredSize());
+            	java.awt.Point pasteLocation = MouseInfo.getPointerInfo().getLocation();
+                SwingUtilities.convertPointFromScreen(pasteLocation, circuitDesignArea);
+            	int newX = alignToGrid(pasteLocation.x);
+            	int newY = alignToGrid(pasteLocation.y);
+                /*juste pour testers c'est quoi le probleme je fixe la position */
+            	//int newX = alignToGrid(100);
+                //int newY = alignToGrid(100);
+
+                newComp.setLocation(newX, newY);
+            	propertiesPanel.updateProperties(newX, newY, newComp.getComponentName());
+                composantsMap.put(newComp, new java.awt.Point(newX, newY));
+
+            	newComp.addMouseListener(new MouseAdapter() {
+                	@Override
+                	public void mousePressed(MouseEvent e) {
+                    	newComp.putClientProperty("offsetX", e.getX());
+                    	newComp.putClientProperty("offsetY", e.getY());
+                	    circuitDesignArea.requestFocusInWindow();
+                        selectedComponent = newComp;
+
+                    }
+                	@Override
+                	public void mouseClicked(MouseEvent e) {
+                    	//selectedComponent = newComp;
+                        //circuitDesignArea.requestFocusInWindow();
+                    propertiesPanel.updateProperties(newComp.getX(), newComp.getY(), newComp.getComponentName());
+                	circuitDesignArea.requestFocusInWindow();
+                }
+            	});
+
+            	newComp.addMouseMotionListener(new MouseAdapter() 		 {
+                	@Override
+                	public void mouseDragged(MouseEvent e) {
+                    	int offsetX = (int) newComp.getClientProperty("offsetX");
+                    	int offsetY = (int) newComp.getClientProperty("offsetY");
+
+                    	int draggedX = e.getXOnScreen() - circuitDesignArea.getLocationOnScreen().x - offsetX;
+                    	int draggedY = e.getYOnScreen() - circuitDesignArea.getLocationOnScreen().y - offsetY;
+
+                    	draggedX = alignToGrid(draggedX);
+                    	draggedY = alignToGrid(draggedY);
+
+                    	newComp.setLocation(draggedX, draggedY);
+                    	propertiesPanel.updateProperties(draggedX, draggedY, newComp.getComponentName());
+                    	ConnectionManager.updateConnectionsForComponent(newComp);
+                    circuitDesignArea.repaint();
+                	}
+            	});
+
+                newComp.setBounds(newComp.getX(), newComp.getY(),
+                                           	         newComp.getPreferredSize().width,
+                                  newComp.getPreferredSize().height);
+                 /*Enregistrer la copie dans la HashMap pour suivi*/
+                 composantsMap.put(newComp, new java.awt.Point(newComp.getX(), newComp.getY()));
+            	 /*Ajouter de la copie sur un calque supérieur*/
+                 circuitDesignArea.add(newComp, Integer.valueOf(2));
+                 circuitDesignArea.setPreferredSize(new Dimension(20000, 12000));
+                 circuitDesignArea.setBackground(new Color(200, 220, 255));/*Bleu Clair*/
+                 circuitDesignArea.revalidate();
+                 circuitDesignArea.repaint();
+ propertiesPanel.updateProperties(newComp.getX(), newComp.getY(), newComp.getComponentName());
+        	}
+    	}
+	});
+
 
         pointPanel.setOpaque(false);
         pointPanel.setBounds(0, 0, circuitDesignArea.getPreferredSize().width, circuitDesignArea.getPreferredSize().height);
