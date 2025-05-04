@@ -506,10 +506,13 @@ public class MainLayout extends JPanel {
                     case "Generator_Determinate":
                         newComponent = new Generator_Determinate();
                         break;
-
-
-
-
+                    case "Splitter":
+                        newComponent = new Splitter_ig();
+                        break;
+                    case "Transistor":
+                        newComponent = new Transistor_ig();
+                        break;
+                    
                     // Ajoutez d'autres cas pour d'autres composants
                     default:
                        // int index = extractIndexFromFileName(componentName);
@@ -1557,6 +1560,12 @@ private AbstractComponent createComponentByName(String componentName) {
         case "LED":
             // Vous pouvez donner un ID générique ici, la position sera fixée après
             comp = new LED_ig("LED1", 0, 0);
+            break;
+        case "Splitter":
+            comp = new Splitter_ig();
+            break;
+        case "Transistor": 
+            comp = new Transistor_ig();
             break;
 
         default:

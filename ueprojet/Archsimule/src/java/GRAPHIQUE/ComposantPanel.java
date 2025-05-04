@@ -86,6 +86,8 @@ public class ComposantPanel extends JPanel {
         wirrayNode.add(new DefaultMutableTreeNode("Ground"));
         wirrayNode.add(new DefaultMutableTreeNode("Generator_Undetermine"));
         wirrayNode.add(new DefaultMutableTreeNode("saved_x"));
+        wirrayNode.add(new DefaultMutableTreeNode("Transistor"));
+        wirrayNode.add(new DefaultMutableTreeNode("Splitter"));
         afficherXMLCount();
 
         treeModel = new DefaultTreeModel(root);

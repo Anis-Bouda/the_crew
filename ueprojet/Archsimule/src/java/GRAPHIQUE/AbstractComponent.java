@@ -20,7 +20,7 @@ public abstract class AbstractComponent extends JPanel {
     protected int numInputs;
     protected int numOutputs;
     protected Composant composant;
-
+    private int rotationAngle = 0; /*  en degrés, 0, 90, 180, 270*/
     public AbstractComponent(String componentName, int numInputs, int numOutputs) {
         this.componentName = componentName;
         this.numInputs = numInputs;
@@ -148,6 +148,9 @@ public abstract class AbstractComponent extends JPanel {
         }
     }
 
+    public int getRotationAngle() {
+        return rotationAngle;
+    }
     public List<Point> getInputPorts() {
         List<Point> globalPositions = new ArrayList<>();
         for (Port p : inputPorts) {

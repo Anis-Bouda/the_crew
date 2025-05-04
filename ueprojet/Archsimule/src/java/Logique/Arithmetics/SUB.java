@@ -9,7 +9,7 @@ public class SUB extends Composant{
     /*car A - B= A + "complemenet a 2 de B"((non B)+1) */
     private ADDER addGate;
     private NON nonGate;
-    
+    private State retenue = State.TRUE;
     public SUB(String id,int n, int x, int y)
     {
         super(id,x,y);
