@@ -31,24 +31,15 @@ public class MUX extends Composant {
             List<State> A = new ArrayList<>(this.inputs.subList(0,(1<<n)));
             List<State> BitsSelection = new ArrayList<>(this.inputs.subList((1<<n), (1<<n)+n));
             State res=State.TRUE;
-            for(int i=0; i<this.n;i++)
-            {
-                /*on verifie que les bits de selection pour erreur et unknown */
-                State bitselecstate=BitsSelection.get(i);
-                //State bitentreestate=A.get(i);
-                if(bitselecstate==State.ERROR )//|| bitentreestate==State.ERROR)
-                {
-                    res=State.ERROR;
-                    break;
-                }
-                else
-                {
-                    if(bitselecstate==State.UNKNOWN )//|| bitentreestate==State.UNKNOWN)
-                    {
-                        res=State.UNKNOWN;
-                    }
-                }
+           for (State bit : BitsSelection) {
+              if (bit == State.ERROR) {
+                res = State.ERROR;
+                break;
+              } else if (bit == State.UNKNOWN) {
+                res = State.UNKNOWN;
             }
+}
+
             if(res!=State.UNKNOWN && res!= State.ERROR)
             {
                 int k=0;

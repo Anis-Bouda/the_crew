@@ -27,7 +27,7 @@ public class Comparator_ig extends AbstractComponent {
         COMPARATOR Comparateurlogique = new COMPARATOR(TOOL_TIP_TEXT_KEY, UNDEFINED_CONDITION, ALLBITS, ABORT);
         setComposant(Comparateurlogique);
 
-        addMouseListener(new MouseAdapter() {
+         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 java.awt.Point clickPoint = e.getPoint();
@@ -35,19 +35,19 @@ public class Comparator_ig extends AbstractComponent {
 
                 for (java.awt.Point port : getInputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println(" Port d'entrée DIVIDER sélectionné !");
+                        System.out.println(" Port d'entrée COMPARATOR sélectionné !");
                     }
                 }
                 for (java.awt.Point port : getOutputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println(" Port de sortie DIVIDER sélectionné !");
+                        System.out.println(" Port de sortie COMPARATOR sélectionné !");
                     }
                 }
             }
         });
     }
 
-    @Override
+     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
