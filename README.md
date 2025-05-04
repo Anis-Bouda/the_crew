@@ -12,7 +12,7 @@ Il existe plusieurs versions qui ont été poussées, et d'autres le seront à l
 * + **Archsimule** -----------> Version Finale compilable et exécutable, pour compiler on fait **make** ou **make compile**  pour executer **make Archsimule** ou **make run** pour effacer lmes executables **make clean** 
 *****************************************************************************************************************************************************************************************************************************
 
-+ **Test** -----------> Répertoire contenant les tests unitaires des classes logiques.
++ **Test** -----------> Répertoire contenant les tests unitaires des classes logiques et quelques main .
 
 + **Test_GraphiqueIHM** -----------> captures d'ecrans de plusieurs tests et certaine erreur 
 
