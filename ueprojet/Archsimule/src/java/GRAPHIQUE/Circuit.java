@@ -10,7 +10,7 @@ import Logique.Input_output.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.awt.Color;
+
 import java.security.Principal;
 public class Circuit{
      protected List<AbstractComponent> components;
@@ -25,26 +25,19 @@ public class Circuit{
     	   components.add(c);
      }
      
-     public void addFil(Connection f) {
-    	   connections.add(f);
-     }
-     
      public void simulate(int MAX_ITERATIONS) throws Exception {
     	    boolean stable=true;
     	    int iteration;
     	    for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
 
-    	        // Évaluation des composants
+    	        /*Évaluation des composants*/
     	        for (AbstractComponent component : components) {
-    	            /*if (component instanceof Generator_ON_OFF) 
-    	            {
-        		((Generator_ON_OFF) component).updateOutputFromState(); // forcer la sortie logique
-    		    }*/
+
     	            List<State> inputs=component.getInputStates();
-		    if (!inputs.isEmpty()) 
-		    {
-    			component.setInputsStates(inputs);
-		    }
+		            if (!inputs.isEmpty())
+		            {
+    			      component.setInputsStates(inputs);
+		            }
     	            Composant composant=component.getComposant();
     	            if(composant!=null)
     	            {
@@ -53,33 +46,16 @@ public class Circuit{
     	            component.updateOutputState();
     	            component.repaint();
     	        }
-		// Mise à jour des fils
+
     	        for (Connection conn : connections) 
     	        {
-                   if (conn.filLogic != null && conn.filview != null) 		        {
+                   if (conn.filLogic != null && conn.filview != null){
         			State previousValue = conn.filLogic.getValue();
-            			conn.filLogic.update(); // met à jour la valeur logique
+            			conn.filLogic.update(); /* met à jour la valeur logique*/
             			if (previousValue != conn.filLogic.getValue()) {
     	                stable = false;
     	            }
-
-            // Met à jour la couleur selon la valeur logique
-                   switch (conn.filLogic.getValue()) 
-                   {
-                	case TRUE:
-                    	    conn.filview.line.setConnection(conn.filview.line.getStart(),conn.filview.line.getEnd(),java.awt.Taskbar.State.NORMAL);
-                            break;
-                	case ERROR:
-                    	    conn.filview.line.setConnection(conn.filview.line.getStart(),conn.filview.line.getEnd(),java.awt.Taskbar.State.ERROR);
-                            break;
-                 	case FALSE:
-                	    conn.filview.line.setConnection(conn.filview.line.getStart(),conn.filview.line.getEnd(),java.awt.Taskbar.State.OFF);
-                            break;
-                	default:
-                    	    conn.filview.line.setConnection(conn.filview.line.getStart(),conn.filview.line.getEnd(),java.awt.Taskbar.State.INDETERMINATE);
-                            break;
-            	}
-        	}
+        	    }
              }
          }
 	 if (stable) 
@@ -87,7 +63,7 @@ public class Circuit{
     	 	System.out.println("Point fixe atteint après " + (iteration + 1) + " itérations.");
     	 	return;
     	  }
-		  throw new Exception("Erreur : circuit instable après " + MAX_ITERATIONS + " itérations.");
+		  throw new Exception("Erreur : circuit instable après " + MAX_ITERATIONS + " cycles.");
     	  }
 
      
