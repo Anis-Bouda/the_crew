@@ -11,7 +11,7 @@ public class Encodeur extends Composant {
         this.addOutput(State.UNKNOWN);
     }
 
-    public void evaluate() {
+  public void evaluate() {
         if (this.inputs.size() == 4 && this.outputs.size() == 2) {
             // Un tableau des inputs 
             State[] inputs = new State[4];
@@ -24,27 +24,27 @@ public class Encodeur extends Composant {
                 outputs[i] = State.UNKNOWN;
             }
             
-            int cptU = 0;
+            int cptE = 0;
             for (int j = 0; j < inputs.length; j++) {
                 inputs[j] = this.inputs.get(j);
-                if (inputs[j] == State.UNKNOWN) {
-                    cptU++;
+                if (inputs[j] == State.ERROR) {
+                    cptE++;
             }}
-            // si y a une entree qui est unknown alors les sorties sont unknown 
-            if (cptU > 0) {
+            // si y a une entree qui est error alors les sorties sont error
+            if (cptE > 0) {
                 for (int i = 0; i < outputs.length; i++) {
-                    outputs[i] = State.UNKNOWN;
+                    outputs[i] = State.ERROR;
             }} 
             else {
-                int cptE = 0;
+                int cptU = 0;
                 for (int j = 0; j < inputs.length; j++) {
                     if (inputs[j] == State.ERROR) {
-                        cptE++;
+                        cptU++;
                 }}
-                // Si y a une entree qui est error alors les sorties sont tous errors 
-                if (cptE > 0) {
+                // Si y a une entree qui est uknown alors les sorties sont tous unknown
+                if (cptU > 0) {
                     for (int i = 0; i < outputs.length; i++) {
-                        outputs[i] = State.ERROR;
+                        outputs[i] = State.UNKNOWN;
                 }} 
                 else {
                 int cptF = 0;
@@ -93,7 +93,6 @@ public class Encodeur extends Composant {
             throw new IllegalStateException("Erreur d'évaluation : L'encodeur doit avoir exactement 4 entrées et 2 sorties.");
         }
     }
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
