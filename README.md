@@ -20,3 +20,4 @@ Il existe plusieurs versions qui ont été poussées, et d'autres le seront à l
   Ces classes peuvent également être utilisées dans les tests du répertoire Test.
 
 + **table_de_vérité** ---------------> tables de verité utilisé pour la logiques des composant principaux .
++ **DocumentationUtilisateurFinale**  ---------------> Documention utilisateur pour comprendre comment aire fonctioner le logiciel
