@@ -37,9 +37,9 @@ public class COMPARATOR extends Composant {
                     greaterThanState = State.ERROR;
                     break;
                 }
-                else 
+                else
                 {
-                    if (A.get(i) == State.UNKNOWN || B.get(i) == State.UNKNOWN) {
+                    if (A.get(i) == State.UNKNOWN && B.get(i) == State.UNKNOWN) {
                         equalityState = State.UNKNOWN;
                         lessThanState = State.UNKNOWN;
                         greaterThanState = State.UNKNOWN;
@@ -97,7 +97,6 @@ public class COMPARATOR extends Composant {
             throw new IllegalStateException("COMPARATOR : doit avoir 2n entrées et 3 sorties.");
         }
     }
-    
     @Override
 	public boolean equals(Object obj)
 	{
