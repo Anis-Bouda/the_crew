@@ -29,11 +29,38 @@ public class ADDER extends Composant{
         }
     }
 
-    @Override
+     @Override
     public void evaluate()
     {
         if (this.inputs.size() == 2 * n + 1 && this.outputs.size() == n + 1)
         {
+            boolean hasError = false;
+            boolean hasUnknown = false;
+            for (State s : this.inputs) {
+                // c'est y a une entree erreur alors c'est erreur 
+                if (s == State.ERROR) {
+                      hasError = true;
+                      break; 
+                // c'est y a une sortie unknown alors c'est unknown 
+                } else if (s == State.UNKNOWN) {
+            hasUnknown = true;
+        }
+    }
+
+    if (hasError) {
+        for (int i = 0; i <n+1; i++) {
+            this.outputs.set(i, State.ERROR);
+        }
+        this.state = State.ERROR;
+        return;
+    } else if (hasUnknown) {
+        for (int i = 0; i <n+1; i++) {
+            this.outputs.set(i, State.UNKNOWN);
+        }
+        this.state = State.UNKNOWN;
+        return;
+    }  
+            /* le cas normal */
             State retenue = this.inputs.get(2 * n); /*Cin initial*/
             for(int i=0;i<this.n;i++)
             {

@@ -31,7 +31,7 @@ public class SUB extends Composant{
     @Override
     public void evaluate()
     {
-        if (this.inputs.size() == 2 * n + 1 && this.outputs.size() == n + 1)
+        if (this.inputs.size() == 2 * n && this.outputs.size() == n + 1)
         {
             List<State> BComplement2= new ArrayList<>();
             for(int i=0;i<this.n;i++)
@@ -42,7 +42,7 @@ public class SUB extends Composant{
                 BComplement2.add(nonGate.getOutput(0));
             }
             /*ajouter a nonB 1 dans la retenue afin d'obtenir le complement a 2 de B */
-            addGate.setInputs(2*n, State.TRUE);
+            addGate.setInputs(2*n, this.retenue);
             /*calculer A-B grace au ADDER */
             for(int i=0;i<n;i++)
             {
@@ -58,7 +58,7 @@ public class SUB extends Composant{
         }
         else
         {
-            throw new IllegalStateException("SUB : substractor doit avoir 2n+1 entrées et n+1 sorties.");
+            throw new IllegalStateException("SUB : substractor doit avoir 2n entrées et n+1 sorties.");
         }
     }
     @Override
