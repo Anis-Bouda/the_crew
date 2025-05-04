@@ -50,6 +50,7 @@ public class ComposantPanel extends JPanel {
         Gates.add(new DefaultMutableTreeNode("ODD PARITY"));
         Gates.add(new DefaultMutableTreeNode("EVEN PARITY"));
         Gates.add(new DefaultMutableTreeNode("Controlled_Buffer"));
+        Gates.add(new DefaultMutableTreeNode("Controlled_inverter"));
         // Ajout des éléments sous "Perxers"
         Perxers.add(new DefaultMutableTreeNode("Multiplexer"));
         Perxers.add(new DefaultMutableTreeNode("Demultiplexer"));

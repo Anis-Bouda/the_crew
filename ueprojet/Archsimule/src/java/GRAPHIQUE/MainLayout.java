@@ -518,6 +518,9 @@ public class MainLayout extends JPanel {
                      case "lampe_state":
                         newComponent = new LED_couleur_ig(componentName, getX(), getY());
                         break;
+                    case "Controlled_inverter":
+                        newComponent =new Controlled_inverter_ig();
+                        break;
                     
                     // Ajoutez d'autres cas pour d'autres composants
                     default:
@@ -1578,6 +1581,9 @@ private AbstractComponent createComponentByName(String componentName) {
             break;
          case "lampe_state":
             comp = new LED_couleur_ig(componentName, getX(), getY());
+            break;
+        case "Controlled_inverter":
+            comp =new Controlled_inverter_ig();
             break;
 
         default:
