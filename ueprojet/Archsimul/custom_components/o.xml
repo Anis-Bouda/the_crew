@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <name>o</name>
+  <inputs>1</inputs>
+  <icon>/icons2/null</icon>
+  <truthTable><![CDATA[00=0
+01=0
+10=1
+11=1]]></truthTable>
+</component>
