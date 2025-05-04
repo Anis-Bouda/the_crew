@@ -8,12 +8,15 @@ Il existe plusieurs versions qui ont été poussées, et d'autres le seront à l
 *(Certaines versions sont obsolètes et ne fonctionnent pas. Elles sont simplement conservées pour illustrer d’anciennes approches ou choix de conception.)*
 
 # Détails des versions du projet :
+**********************************************************************************************************************************************************************************
+* + **Archsimule** -----------> Version Finale compilable et exécutable, pour compiler on fait **make** ou **make compile**  pour executer **make Archsimule** ou **make run**   *
+**********************************************************************************************************************************************************************************
 
-+ **Test** → Répertoire contenant les tests unitaires des classes logiques.
++ **Test** -----------> Répertoire contenant les tests unitaires des classes logiques.
 
-+ **lisaisongris** -----------> Version compilable et exécutable, datant du 10/04/2025, présentée au tuteur le **11/04/2025**.  
-  Dans cette version, la partie graphique et la partie logique sont liées, mais **le changement de couleur des fils n'est pas encore intégré**.  
-  *(Cette fonctionnalité a été ajoutée peu après, de manière simple.)*
++ **Test_GraphiqueIHM** -----------> captures d'ecrans de plusieurs tests et certaine erreur 
 
 + **logique** ----------------> Contient les *classes logiques* utilisées dans le projet.  
   Ces classes peuvent également être utilisées dans les tests du répertoire Test.
+
++ **table_de_vérité** ---------------> tables de verité utilisé pour la logiques des composant principaux .
