@@ -71,8 +71,9 @@ public abstract class AbstractComponent6 extends AbstractComponent {
         }
         inputPorts.add(new Port(new java.awt.Point(10, 70)));
 
-        
-        outputPorts.add(new Port(new java.awt.Point(128, 74)));
-        outputPorts.add(new Port(new java.awt.Point(130, 30)));
+
+         outputPorts.add(new Port(new java.awt.Point(130, 30)));
+         outputPorts.add(new Port(new java.awt.Point(128, 74)));
+
     }
 }
