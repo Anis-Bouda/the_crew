@@ -22,17 +22,18 @@ public class BasculeSR extends Composant {
          }
          
          // le cas ou y a un unknown
-         if(S == State.UNKNOWN || R == State.UNKNOWN) {
+         if(S == State.UNKNOWN && R == State.UNKNOWN) {
         	 for (int i = 0; i < outputs.length; i++) {
                  outputs[i] = State.UNKNOWN;
              }
          }
          
          // le cas ou y a un error
-         else if(S == State.ERROR || R == State.ERROR) {
-        	 for (int i = 0; i < outputs.length; i++) {
-                 outputs[i] = State.ERROR;
-             }
+         else if ((S == State.ERROR || R == State.ERROR) || 
+               (S == State.ERROR && R == State.UNKNOWN) ||
+               (S == State.UNKNOWN && R == State.ERROR)){
+             outputs[0] = State.ERROR;
+             outputs[1] = State.ERROR;
          }
          
          else if(S == State.TRUE && R == State.TRUE) {

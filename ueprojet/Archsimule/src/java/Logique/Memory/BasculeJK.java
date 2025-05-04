@@ -25,16 +25,18 @@ public class BasculeJK extends Composant{
          
          if(CLK == State.TRUE) {
            // le cas ou y a un unknown
-           if(J == State.UNKNOWN || K == State.UNKNOWN) {
+           if(J == State.UNKNOWN && K == State.UNKNOWN) {
         	 for (int i = 0; i < outputs.length; i++) {
                  outputs[i] = State.UNKNOWN;
            }}
          
          // le cas ou y a un error
-         else if(J == State.ERROR || K == State.ERROR) {
-        	 for (int i = 0; i < outputs.length; i++) {
-                 outputs[i] = State.ERROR;
-         }}
+        else if ((J == State.ERROR || K == State.ERROR) || 
+               (J == State.ERROR && K == State.UNKNOWN) ||
+               (J == State.UNKNOWN && K == State.ERROR)){
+             outputs[0] = State.ERROR;
+             outputs[1] = State.ERROR;
+         }
          
          else if(J == State.TRUE && K == State.TRUE) {
         	 if (outputs[0] == State.TRUE) {
