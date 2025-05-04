@@ -13,6 +13,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.util.List;
+import Logique.Arithmetics.MULTPLAY;
+
 
 public class Multiplier_ig extends AbstractComponent {
     private final int width = 40;
@@ -22,6 +24,9 @@ public class Multiplier_ig extends AbstractComponent {
     public Multiplier_ig() {
         super("MULTIPLIER", 4, 4);
         setOpaque(false);
+
+         MULTPLAY multLogic=new MULTPLAY("Mult#"+System.currentTimeMillis(),2,getX(),getY());
+        setComposant(multLogic);
 
         addMouseListener(new MouseAdapter() {
             @Override
