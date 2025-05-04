@@ -49,7 +49,7 @@ public class ComposantPanel extends JPanel {
         Gates.add(new DefaultMutableTreeNode("NAND"));
         Gates.add(new DefaultMutableTreeNode("ODD PARITY"));
         Gates.add(new DefaultMutableTreeNode("EVEN PARITY"));
-
+        Gates.add(new DefaultMutableTreeNode("Controlled_Buffer"));
         // Ajout des éléments sous "Perxers"
         Perxers.add(new DefaultMutableTreeNode("Multiplexer"));
         Perxers.add(new DefaultMutableTreeNode("Demultiplexer"));
@@ -88,6 +88,7 @@ public class ComposantPanel extends JPanel {
         wirrayNode.add(new DefaultMutableTreeNode("saved_x"));
         wirrayNode.add(new DefaultMutableTreeNode("Transistor"));
         wirrayNode.add(new DefaultMutableTreeNode("Splitter"));
+        wirrayNode.add(new DefaultMutableTreeNode("lampe_state"));
         afficherXMLCount();
 
         treeModel = new DefaultTreeModel(root);

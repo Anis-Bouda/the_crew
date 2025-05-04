@@ -512,6 +512,12 @@ public class MainLayout extends JPanel {
                     case "Transistor":
                         newComponent = new Transistor_ig();
                         break;
+                    case " Controlled_Buffer":
+                        newComponent = new  Controlled_Buffer_ig();
+                        break;
+                     case "lampe_state":
+                        newComponent = new LED_couleur_ig(componentName, getX(), getY());
+                        break;
                     
                     // Ajoutez d'autres cas pour d'autres composants
                     default:
@@ -1566,6 +1572,12 @@ private AbstractComponent createComponentByName(String componentName) {
             break;
         case "Transistor": 
             comp = new Transistor_ig();
+            break;
+        case " Controlled_Buffer":
+            comp = new  Controlled_Buffer_ig();
+            break;
+         case "lampe_state":
+            comp = new LED_couleur_ig(componentName, getX(), getY());
             break;
 
         default:
