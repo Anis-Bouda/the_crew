@@ -16,11 +16,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -50,11 +52,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import GRAPHIQUE_IG.*;
 import Logique.Principale.Composant;
 import Logique.Principale.State;
-
 
 /*les imports pour la création du circuit */
 import java.util.List;
@@ -67,14 +67,25 @@ import javax.swing.ActionMap;
 import java.awt.MouseInfo;
 import javax.swing.SwingUtilities;
 
-// Note : Ne pas importer java.awt.Point ici pour éviter le conflit avec votre classe custom Point
-	//
+/*import pour forcer l'affichage des messages d'aides */
+import javax.swing.ToolTipManager;
+
+
+
 public class MainLayout extends JPanel {
     private PropertiesPanel propertiesPanel;
-    // Modification : utiliser Map<Object, java.awt.Point> pour pouvoir stocker Square (qui n'est pas un JLabel)
- // Remplace par :
+
+
     private Map<AbstractComponent, java.awt.Point> composantsMap = new HashMap<>();
     private Map<Point, java.awt.Point> panelPositions = new HashMap<>();
+
+    /*attributs pour les actions copier coller */
+    AbstractComponent selectedComponent=null;
+    AbstractComponent copiedComponent=null;
+    /*Circuit de départ pour utiliser circuit.stop() en cliquant sur le bouton stop */
+    Circuit circuit=null;
+
+
     public class ConnectionState {
         public String firstState;
         public String lastState;
@@ -84,11 +95,11 @@ public class MainLayout extends JPanel {
             this.lastState = lastState;
         }
     }
-    
+
   	public static List<ConnectionState> connectionStates = new ArrayList<>();
-    
-    
-    
+
+
+
  // Classe racine de la session
   	private static class SessionData {
   	    List<ComponentData> components;
@@ -102,75 +113,63 @@ public class MainLayout extends JPanel {
   	    List<String> states;
   	}
 
-    
-    
-    
+
+
+
   	 private JLayeredPane circuitDesignArea;
 
-     
+
     public MainLayout(JLayeredPane externalDesignArea) {
         // Set layout to BorderLayout (équivalent à BorderPane en JavaFX)
-    	
+
         //circuitDesignArea = new JLayeredPane();
         //circuitDesignArea.setLayout(null);
         //circuitDesignArea.setPreferredSize(new Dimension(1500,1000));
         //add(circuitDesignArea, BorderLayout.CENTER);
         //ConnectionManager.setLayeredPane(circuitDesignArea);
 
-    	
-    	
+
+
     	  this.circuitDesignArea = externalDesignArea;
+
+
 
         setLayout(new BorderLayout());
 
-        //  Liste des composants supportés (Placeholder Panel)
+        // Liste des composants supportés (Placeholder Panel)
         JPanel composants = new JPanel();
         composants.add(new JLabel("Composants ici")); // Ajout d'un label pour éviter qu'il soit vide
-        
+
         composantsMap = new HashMap<>();
         circuitDesignArea = new JLayeredPane();
         //  Panneau de contrôle avec boutons "Run", "Stop", "Fil"
         JPanel control = new JPanel();
         JButton run=new JButton("Run");
+        run.setToolTipText("Cliquez ici pour lancer la simulation Ctrl+R");
         run.addActionListener(e->executerCircuit(circuitDesignArea));
         control.add(run);
-        control.add(new JButton("Stop"));
-        control.add(new JButton("Fil"));
+        JButton stop=new JButton("Stop");
+        stop.addActionListener(e->/*appel à la fonction d'arret*/circuit.stop());
+        stop.setToolTipText("Cliquez ici pour arrêter la simulation Ctrl+Z");
+        control.add(stop);
+        JButton fil=new JButton("Fil");
+        fil.setToolTipText("Cliquez ici pour créer un fil");
+        control.add(fil);
 
-        //  Zone pour afficher les propriétés des composants
-        propertiesPanel = new PropertiesPanel();
-        propertiesPanel.setBorder(BorderFactory.createTitledBorder("Propriétés"));
+        /*l'ajout des raccourcis Clavier*/
+        InputMap inputMap = circuitDesignArea.getInputMap(JLayeredPane.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = circuitDesignArea.getActionMap();
+        /*raccourcis clavier pour RUN CTRL + R*/
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK), "run");
+	actionMap.put("run", new AbstractAction()
+	{
+    		@Override
+    		public void actionPerformed(ActionEvent e) {
+        	executerCircuit(circuitDesignArea);
+    		}
+	});
 
-        //  Création du panneau latéral gauche (VBox en JavaFX → BoxLayout en Swing)
-        JPanel simulationControl = new JPanel();
-        simulationControl.setLayout(new BoxLayout(simulationControl, BoxLayout.Y_AXIS));
-        simulationControl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        simulationControl.add(control);
-        simulationControl.add(new ComposantPanel()); // Replace old composants with hierarchical list
-        simulationControl.add(propertiesPanel);
-        add(simulationControl, BorderLayout.WEST);
-
-        //  Zone de conception des circuits (Placeholder)
-        circuitDesignArea.setLayout(null);
-        circuitDesignArea.setPreferredSize(new Dimension(1500, 1000));
-        showLoadSessionDialog();
-        
-        add(circuitDesignArea, BorderLayout.CENTER);
-     // Dans le constructeur de MainLayout, après la création de circuitDesignArea :
-        ConnectionManager.setLayeredPane(circuitDesignArea);
-
-        // Utilisation de votre classe custom Point pour l'affichage du fond
-        Point pointPanel = new Point();  // Ici, "Point" est votre classe qui étend JPanel et dessine la grille
-        pointPanel.setOnMoveListener(newPosition -> {
-            // Mise à jour des propriétés
-            propertiesPanel.updateProperties(newPosition.x, newPosition.y, "Carré Rouge");
-
-            // Mise à jour de la HashMap
-            panelPositions.put(pointPanel, newPosition);
-
-        });
-
-          /*l'ajout du raccourcis Clavier Ctrl+Z pour arreter l'exécution  */
+        /*l'ajout du raccourcis Clavier Ctrl+Z pour arreter l'exécution  */
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK), "stop");
 	actionMap.put("stop", new AbstractAction()
 	{
@@ -179,7 +178,8 @@ public class MainLayout extends JPanel {
         	circuit.stop();
     		}
 	});
-               /*l'ajout des raccourcis Clavier Ctrl+C et Ctrl+V pour copier et coller*/
+
+        /*l'ajout des raccourcis Clavier Ctrl+C et Ctrl+V pour copier et coller*/
         /* Copier le composant sélectionné avec CTRL + C*/
 	inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK), "copy");
 	actionMap.put("copy", new AbstractAction()
@@ -276,10 +276,53 @@ public class MainLayout extends JPanel {
 	});
 
 
+
+
+
+        // Zone pour afficher les propriétés des composants
+        propertiesPanel = new PropertiesPanel();
+        propertiesPanel.setBorder(BorderFactory.createTitledBorder("Propriétés"));
+
+        // Création du panneau latéral gauche (VBox en JavaFX → BoxLayout en Swing)
+        JPanel simulationControl = new JPanel();
+        simulationControl.setLayout(new BoxLayout(simulationControl, BoxLayout.Y_AXIS));
+        simulationControl.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        simulationControl.add(control);
+        simulationControl.add(new ComposantPanel()); // Replace old composants with hierarchical list
+        simulationControl.add(propertiesPanel);
+        add(simulationControl, BorderLayout.WEST);
+
+
+
+
+
+        //  Zone de conception des circuits (Placeholder)
+        circuitDesignArea.setLayout(null);
+        circuitDesignArea.setPreferredSize(new Dimension(1500, 1000));
+        showLoadSessionDialog();
+
+
+
+
+        add(circuitDesignArea, BorderLayout.CENTER);
+     // Dans le constructeur de MainLayout, après la création de circuitDesignArea :
+        ConnectionManager.setLayeredPane(circuitDesignArea);
+
+        // Utilisation de votre classe custom Point pour l'affichage du fond
+        Point pointPanel = new Point();  // Ici, "Point" est votre classe qui étend JPanel et dessine la grille
+        pointPanel.setOnMoveListener(newPosition -> {
+            // Mise à jour des propriétés
+            propertiesPanel.updateProperties(newPosition.x, newPosition.y, "Carré Rouge");
+
+            // Mise à jour de la HashMap
+            panelPositions.put(pointPanel, newPosition);
+
+        });
+
         pointPanel.setOpaque(false);
         pointPanel.setBounds(0, 0, circuitDesignArea.getPreferredSize().width, circuitDesignArea.getPreferredSize().height);
         circuitDesignArea.add(pointPanel, Integer.valueOf(0));
-       
+
         circuitDesignArea.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -288,7 +331,7 @@ public class MainLayout extends JPanel {
                 circuitDesignArea.revalidate();
             }
         });
-        
+
         circuitDesignArea.setTransferHandler(new TransferHandler() {
             @Override
             public boolean canImport(TransferHandler.TransferSupport support) {
@@ -312,7 +355,7 @@ public class MainLayout extends JPanel {
                     // Créer le composant correspondant
                     AbstractComponent newComponent;
                     switch (componentName) {
-                    
+
                     case "NOT":
                         newComponent = new NOT_ig();
                         break;
@@ -321,65 +364,65 @@ public class MainLayout extends JPanel {
                         break;
                     case "OR":
                         newComponent = new OR_ig();
-                        
+
                         break;
                     case "Multiplexer":
                         newComponent = new MUX_ig();
-                        
+
                         break;
                     case "Demultiplexer":
                         newComponent = new DEMUX_ig();
-                        
+
                         break;
                     case "Decoder":
                         newComponent = new DECODER_ig();
-                        
+
                         break;
                     case "Priority Encoder":
                         newComponent = new ENCODER_ig();
-                        
+
                         break;
                     case "BUFFER":
                         newComponent = new BUFFER_ig();
- 
+
                         break;
                     case "NOR":
                         newComponent = new NOR_ig();
- 
+
                         break;
                     case "XOR":
                         newComponent = new XOR_ig();
- 
+
                         break;
                     case "NAND":
                         newComponent = new NAND_ig();
- 
+
                         break;
-                        
+
                     case "XNOR":
                         newComponent = new XNOR_ig();
                         break;
                     case "Bit Selector":
                         newComponent = new BITSELECTOR_ig();
-                        
+
                         break;
                     case "ODD PARITY":
                         newComponent = new ODD_ig();
-                        
+
                         break;
                     case "EVEN PARITY":
                         newComponent = new EVEN_ig();
-                        
+
                         break;
                     case "Adder":
                         newComponent = new Adder_ig();
                         break;
-                        
+
                     case "Subtractor":
-                        newComponent = new Subtractor_ig();
+                        newComponent = new Substractor_ig();
                         break;
                     case "Multiplier":
-                        newComponent = new Multiplier();
+                        newComponent = new Multiplier_ig();
                         break;
                     case "Comparator":
                         newComponent = new Comparator_ig();
@@ -402,65 +445,70 @@ public class MainLayout extends JPanel {
                     case "OutPut":
                         newComponent = new OutPut();
                         break;
-                    
+
                     case "Generator_ON_OFF":
                         newComponent = new Generator_ON_OFF();
                         break;
-                    
+
                     case "Generator_Undetermine":
                         newComponent = new Generator_Undetermine();
                         break;
 
+
                     case "RAM":
                         newComponent = new RAM_ig();
-                        
+
                         break;
                     case "ROM":
                         newComponent = new ROM_ig();
-                        
+
                         break;
                     case "Counter":
                         newComponent = new CMPT_ig();
-                        
+
                         break;
                     case "Register":
                         newComponent = new RNG();
-                        
+
                         break;
                     case "JK flip flop":
                         newComponent = new BJK_ig();
-                        
+
                         break;
                     case "RS flip flop":
                         newComponent = new BRS_ig();
-                        
+
                         break;
                     case "D flip flop":
                         newComponent = new BasculeD_ig();
-                        
+
                         break;
                     case "T flip flop":
                         newComponent = new BasculeT_ig();
-                        
+
                         break;
                     case "Clock":
                         newComponent = new Clock_ig();
-                        
+
                         break;
                     case "Power":
                         newComponent = new Power_ig();
-                        
-                        break;   
+
+                        break;
                     case "Ground":
                         newComponent = new Ground_ig();
-                        
-                        break;         
+
+                        break;
                     case "LED":
                         newComponent = new LED_ig("LED1", alignedX, alignedY); // Ajuste l'id et la position selon tes besoins
                         break;
-                    
-                    
-                    
+
+                    case "Generator_Determinate":
+                        newComponent = new Generator_Determinate();
+                        break;
+
+
+
 
                     // Ajoutez d'autres cas pour d'autres composants
                     default:
@@ -470,29 +518,49 @@ public class MainLayout extends JPanel {
                             // Lire dynamiquement le nombre d'entrées dans le fichier XML
                             int numInputs = ReadInputCount.getInputCount(componentName + ".xml");
                             newComponent = new SavedX_ig(numInputs);
-                        } else {
-                        	   //  Récupère le nombre d’entrées enregistré dans le XML
-                            int numInputs = ReadInputCount.getInputCount(componentName + ".xml");
-                            //  Chemin vers ton XML
-                            String xmlPath = "custom_components/" + componentName + ".xml";
-                            //  Crée la vue graphique
-                            MyGate_ig view = new MyGate_ig(2, xmlPath);
-                            //  Crée le composant logique à attacher
-                            MyGate logic = new MyGate(
-                                componentName + "#" + System.currentTimeMillis(),
-                                alignedX, alignedY,
-                                xmlPath
-                            );
-                            //  Lie la vue et la logique
+                        }else {
+                            // 1) Recherche du fichier XML dans les dossiers 1, 2 et 3 entrées
+                            String xmlPath = null;
+                            for (int i = 1; i <= 3; i++) {
+                                String candidate = "custom_components" + i + "/" + componentName + ".xml";
+                                if (new File(candidate).exists()) {
+                                    xmlPath = candidate;
+                                    break;
+                                }
+                            }
+                            if (xmlPath == null) {
+                                throw new IllegalStateException("Fichier XML introuvable pour le composant " + componentName);
+                            }
+
+                            // 2) Récupère le nombre d’entrées depuis ce fichier
+                            int numInputs = ReadInputCount.getInputCount(xmlPath);
+                            System.out.println("NumInputs lu = " + numInputs);
+
+                            // 3) Crée la vue graphique adaptée
+                            MyGate_ig view = new MyGate_ig(numInputs, xmlPath);
+
+                            // 4) Crée la logique correspondante
+                            String uniqueId = componentName + "#" + System.currentTimeMillis();
+                            Composant logic;
+                            if (numInputs == 1) {
+                                logic = new MyGate1(uniqueId, alignedX, alignedY, xmlPath);
+                            } else if (numInputs == 2) {
+                                logic = new MyGate(uniqueId, alignedX, alignedY, xmlPath);
+                            } else { // numInputs == 3
+                                logic = new MyGate3(uniqueId, alignedX, alignedY, xmlPath);
+                            }
+
+                            // 5) Lie la vue et la logique
                             view.setComposant(logic);
                             newComponent = view;
                         }
 
+
                         break;
 
                 }
-                          
-                       
+
+
                     newComponent.setBounds(alignedX, alignedY,
                                            newComponent.getPreferredSize().width,
                                            newComponent.getPreferredSize().height);
@@ -506,13 +574,26 @@ public class MainLayout extends JPanel {
                         public void mousePressed(MouseEvent e) {
                             newComponent.putClientProperty("offsetX", e.getX());
                             newComponent.putClientProperty("offsetY", e.getY());
+                            selectedComponent=newComponent;
+                            circuitDesignArea.requestFocusInWindow();
+
                         }
                         @Override
                         public void mouseClicked(MouseEvent e) {
                             propertiesPanel.updateProperties(newComponent.getX(), newComponent.getY(), newComponent.getComponentName());
+                            //selectedComponent=newComponent;
+                            circuitDesignArea.requestFocusInWindow();
+
                         }
                     });
-                    
+
+
+
+
+
+
+
+
                     newComponent.addMouseMotionListener(new MouseAdapter() {
                         @Override
                         public void mouseDragged(MouseEvent e) {
@@ -540,7 +621,9 @@ public class MainLayout extends JPanel {
                     circuitDesignArea.add(newComponent, Integer.valueOf(2));
                     circuitDesignArea.setPreferredSize(new Dimension(20000, 12000));
 
-                    
+
+
+
                     circuitDesignArea.setBackground(new Color(200, 220, 255)); // Bleu clair
                     circuitDesignArea.revalidate();
                     circuitDesignArea.repaint();
@@ -553,17 +636,17 @@ public class MainLayout extends JPanel {
                 return false;
             }
 
-       
+
         });
 
     }
-    
+
     /**
      * Méthode pour récupérer l'icône associée au composant.
      * Les chemins doivent correspondre à l'emplacement de vos fichiers images dans votre projet.
      * Toutes les icônes seront redimensionnées à 64x64 pixels.
      */
-    
+
 
     private ImageIcon getComponentIcon(String componentName) {
         ImageIcon icon = null;
@@ -689,7 +772,7 @@ public class MainLayout extends JPanel {
         Image scaledImage = icon.getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
         return new ImageIcon(scaledImage);
     }
-  
+
     private int gridSpacing = 10; // Même valeur que DOT_SPACING dans votre classe Point
 
     private int alignToGrid(int coord) {
@@ -741,34 +824,49 @@ public class MainLayout extends JPanel {
             JOptionPane.showMessageDialog(this, "Erreur lors de la sauvegarde du circuit.");
         }
     }
-    
+
+
+
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
     // Création de la barre de menu
     public JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
- 
+
         // Menu File
         JMenu mnuFile = new JMenu("File");
         mnuFile.setMnemonic('F');
 
         JMenuItem mnuNewFile = new JMenuItem("New File");
         mnuNewFile.setIcon(new ImageIcon(getClass().getResource("/icons1/new.png")));
+        /*nuage d'aide */
+        mnuNewFile.setToolTipText("Cliquez ici pour créer une nouvelle session");
+
         mnuNewFile.setMnemonic('N');
         mnuNewFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
         mnuFile.add(mnuNewFile);
 
         JMenuItem mnuOpenFile = new JMenuItem("Open File");
         mnuOpenFile.setIcon(new ImageIcon(getClass().getResource("/icons1/open.png")));
+        /*nuage d'aide */
+        mnuOpenFile.setToolTipText("Cliquez ici pour ouvrir une session déjà existante");
+
         mnuOpenFile.setMnemonic('O');
         mnuOpenFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
         mnuFile.add(mnuOpenFile);
 
         JMenuItem mnuSaveFile = new JMenuItem("Save File");
         mnuSaveFile.setIcon(new ImageIcon(getClass().getResource("/icons1/save.png")));
+        /*nuage d'aide */
+        mnuSaveFile.setToolTipText("Cliquez ici pour sauvegarder une session");
+
         mnuSaveFile.setMnemonic('S');
         mnuSaveFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
         mnuSaveFile.addActionListener(e -> saveCircuit());
         mnuFile.add(mnuSaveFile);
-     //  Sauvegarde/chargement de session 
+     // Sauvegarde/chargement de session
         JMenuItem mnuSaveSession = new JMenuItem("Save Session");
         mnuSaveSession.setMnemonic('T');
         mnuSaveSession.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.CTRL_DOWN_MASK));
@@ -780,10 +878,13 @@ public class MainLayout extends JPanel {
                 saveSession(chooser.getSelectedFile());
             }
         });
-  // réutilise votre méthode existante
+
         mnuFile.add(mnuSaveSession);
 
         JMenuItem mnuLoadSession = new JMenuItem("Load Session");
+        /*nuage d'aide */
+        mnuSaveFile.setToolTipText("Cliquez ici pour charger une session");
+
         mnuLoadSession.setMnemonic('L');
         mnuLoadSession.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
         mnuLoadSession.addActionListener(e -> {
@@ -800,7 +901,7 @@ public class MainLayout extends JPanel {
                 //  Instancie un nouveau MainLayout
                 MainLayout newLayout = new MainLayout(circuitDesignArea1);
                 newLayout.loadSession(xmlFile);
-                // Monte la barre de menu et le contenu
+                //  Monte la barre de menu et le contenu
                 frame.setJMenuBar(newLayout.createMenuBar());
                 frame.setContentPane(newLayout);
                 frame.pack();
@@ -814,9 +915,12 @@ public class MainLayout extends JPanel {
 
         //mnuFile.add(mnuLoadSession);
 
-        
+
         JMenuItem mnuSaveComponent = new JMenuItem("Save Component");
         mnuSaveComponent.setIcon(new ImageIcon(getClass().getResource("/icons1/save.png")));
+        /*nuage d'aide */
+        mnuSaveFile.setToolTipText("Cliquez ici pour Créer un composant avec un nom , icon et une table de verité");
+
         mnuSaveComponent.setMnemonic('C');
         mnuSaveComponent.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, KeyEvent.CTRL_DOWN_MASK));
         mnuSaveComponent.addActionListener(e -> saveCustomComponent());
@@ -824,10 +928,23 @@ public class MainLayout extends JPanel {
 
         JMenuItem mnuExitFile = new JMenuItem("Exit");
         mnuExitFile.setIcon(new ImageIcon(getClass().getResource("/icons1/exit.png")));
+        /*nuage d'aide */
+        mnuExitFile.setToolTipText("Cliquez ici pour quitter la session");
+
         mnuExitFile.setMnemonic('E');
         mnuExitFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
         mnuExitFile.addActionListener(this::ExitBtn);
         mnuFile.add(mnuExitFile);
+
+
+        /*enregistrer les JMenuItems auprès de ToolTipManager pour forcer l'affichage des message d'aide sur les JMenuItems*/
+        ToolTipManager.sharedInstance().registerComponent(mnuNewFile);
+        ToolTipManager.sharedInstance().registerComponent(mnuOpenFile);
+        ToolTipManager.sharedInstance().registerComponent(mnuSaveFile);
+        ToolTipManager.sharedInstance().registerComponent(mnuLoadSession);
+        ToolTipManager.sharedInstance().registerComponent(mnuSaveComponent);
+        ToolTipManager.sharedInstance().registerComponent(mnuExitFile);
+
 
         menuBar.add(mnuFile);
 
@@ -840,10 +957,12 @@ public class MainLayout extends JPanel {
 
         return menuBar;
     }
-  
-    
+
+
+
+
     private void saveCustomComponent() {
-        //  Choix du nombre d’entrées
+        // 1) Choix du nombre d’entrées
         Integer[] options = {1, 2, 3};
         Integer numInputs = (Integer) JOptionPane.showInputDialog(
             null,
@@ -856,7 +975,7 @@ public class MainLayout extends JPanel {
         );
         if (numInputs == null) return;  // Annulé
 
-        //  Nom du composant
+        // 2) Nom du composant
         String componentName = JOptionPane.showInputDialog(
             null,
             "Nom du composant :",
@@ -868,13 +987,13 @@ public class MainLayout extends JPanel {
             return;
         }
 
-        // Table de vérité
+        // 3) Table de vérité
         JTextArea truthTableArea = new JTextArea(10, 30);
         JScrollPane scrollPane = new JScrollPane(truthTableArea);
         int result = JOptionPane.showConfirmDialog(
             null,
             scrollPane,
-            "Entrez la table de vérité (ex: 00=0, 01=1, ...)",
+            "Entrez la table de vérité (ex: 0=0, 1=1 ou 00=0, 01=1, ...)",
             JOptionPane.OK_CANCEL_OPTION
         );
         if (result != JOptionPane.OK_OPTION) return;
@@ -884,55 +1003,204 @@ public class MainLayout extends JPanel {
             return;
         }
 
-        //  Sélection d’une icône… (inchangé)
+        // 4) Sélection d’une icône : trois cas
+        String imageFileName;
+        String[] iconChoices = {"Défaut", "Parcourir fichier...", "Choisir parmi icônes"};
+        int iconMode = JOptionPane.showOptionDialog(
+            null,
+            "Comment choisir l'icône ?",
+            "Sélection icône",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            iconChoices,
+            iconChoices[0]
+        );
 
-        // Enregistrement XML en incluant numInputs
-        try {
-            File file = new File("custom_components/" + componentName + ".xml");
-            file.getParentFile().mkdirs();
-            PrintWriter writer = new PrintWriter(file);
+        if (iconMode == 0) {
+            // Cas “Défaut”
+            switch (numInputs) {
+                case 1: imageFileName = "default1.png"; break;
+                case 2: imageFileName = "default2.png"; break;
+                case 3: imageFileName = "default3.png"; break;
+                default: imageFileName = "default.png";
+            }
+
+        } else if (iconMode == 1) {
+            // Cas “Parcourir fichier...”
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Sélectionnez votre icône");
+            chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                "Images PNG/JPG", "png", "jpg", "jpeg"));
+            int fc = chooser.showOpenDialog(null);
+            if (fc == JFileChooser.APPROVE_OPTION) {
+                File imgFile = chooser.getSelectedFile();
+                // Copie dans /icons2/
+                File dest = new File("icons2/" + imgFile.getName());
+                try {
+                    java.nio.file.Files.createDirectories(dest.getParentFile().toPath());
+                    java.nio.file.Files.copy(
+                        imgFile.toPath(),
+                        dest.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                    );
+                    imageFileName = imgFile.getName();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null,
+                        "Impossible de copier l'icône, utilisation de l'icône par défaut.",
+                        "Erreur", JOptionPane.WARNING_MESSAGE);
+                    imageFileName = "default.png";
+                }
+            } else {
+                // Annulé → défaut
+                imageFileName = "default.png";
+            }
+
+        } else if (iconMode == 2) {
+            // Cas “Choisir parmi icônes”
+
+            ImageIcon chosen = (ImageIcon) JOptionPane.showInputDialog(
+                null,
+                "Choisissez une icône existante :",
+                "Icônes disponibles",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                getAllAvailableIcons(),
+                getComponentIconByName("default")
+            );
+            if (chosen != null) {
+                imageFileName = extractIconFileName(chosen);
+            } else {
+                // Annulé → défaut
+                imageFileName = "default.png";
+            }
+
+        } else {
+            // Si la boîte est fermée autrement
+            imageFileName = "default.png";
+        }
+
+        // 5) Enregistrement XML dans custom_components{n}
+        String folderName = "custom_components" + numInputs;
+        File dir = new File(folderName);
+        dir.mkdirs();
+        File file = new File(dir, componentName + ".xml");
+        try (PrintWriter writer = new PrintWriter(file, "UTF-8")) {
             writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             writer.println("<component>");
             writer.println("  <name>"      + componentName + "</name>");
             writer.println("  <inputs>"    + numInputs     + "</inputs>");
-            String imageFileName = null;
-			writer.println("  <icon>/icons2/" + imageFileName + "</icon>");
+            writer.println("  <icon>/icons2/" + imageFileName + "</icon>");
             writer.println("  <truthTable><![CDATA[" + truthTable + "]]></truthTable>");
             writer.println("</component>");
-            writer.close();
-            JOptionPane.showMessageDialog(null, "Composant sauvegardé !");
+            JOptionPane.showMessageDialog(null,
+                "Composant sauvegardé dans « " + folderName + " » !"
+            );
         } catch (IOException ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Erreur lors de la sauvegarde !");
+            JOptionPane.showMessageDialog(null,
+                "Erreur lors de la sauvegarde : " + ex.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
         }
+
+        // 6) Instanciation et ajout dans le circuit (inchangé)
+        String xmlPath = file.getAbsolutePath();
+        int addX = 50, addY = 50;
+        MyGate_ig view;
+        switch (numInputs) {
+            case 1: view = new MyGate_ig(1, xmlPath); break;
+            case 2: view = new MyGate_ig(2, xmlPath); break;
+            default: view = new MyGate_ig(3, xmlPath); break;
+        }
+        String uniqueId = componentName + "#" + System.currentTimeMillis();
+        Composant logic;
+        if (numInputs == 1) logic = new MyGate1(uniqueId, addX, addY, xmlPath);
+        else if (numInputs == 2) logic = new MyGate(uniqueId, addX, addY, xmlPath);
+        else logic = new MyGate3(uniqueId, addX, addY, xmlPath);
+
+        view.setComposant(logic);
+        view.setBounds(addX, addY, view.getPreferredSize().width, view.getPreferredSize().height);
+        circuitDesignArea.add(view, Integer.valueOf(2));
+        composantsMap.put(view, new java.awt.Point(addX, addY));
+        circuitDesignArea.revalidate();
+        circuitDesignArea.repaint();
+        ConnectionManager.refreshAllConnections();
     }
 
+    /**
+     * Exemple : retourne un tableau d'ImageIcon déjà chargées
+     * (à adapter selon votre gestion des icônes).
+     */
+    private ImageIcon[] getAllAvailableIcons() {
+        // Récupère tous les noms de composants dans la Map
+        Set<String> names = ICON_PATHS.keySet();
+        ImageIcon[] icons = new ImageIcon[names.size()];
+        int i = 0;
+        for (String componentName : names) {
+            icons[i++] = getComponentIconByName(componentName);
+        }
+        return icons;
+    }
+
+    private static final Map<String, String> ICON_PATHS = new HashMap<>();
+    static {
+        ICON_PATHS.put("NOT",                "/icons2/not.png");
+        ICON_PATHS.put("OR",                 "/icons2/or.png");
+        ICON_PATHS.put("AND",                "/icons2/and.png");
+        ICON_PATHS.put("BUFFER",             "/icons2/buffer.png");
+        ICON_PATHS.put("NOR",                "/icons2/nor.png");
+        ICON_PATHS.put("XOR",                "/icons2/xor.png");
+        ICON_PATHS.put("XNOR",               "/icons2/xnor.png");
+        ICON_PATHS.put("NAND",               "/icons2/nand.png");
+        ICON_PATHS.put("ODD PARITY",         "/icons2/odd_parity.png");
+        ICON_PATHS.put("EVEN PARITY",        "/icons2/even_parity.png");
+        ICON_PATHS.put("Multiplexer",        "/icons2/multiplexer.png");
+        ICON_PATHS.put("Demultiplexer",      "/icons2/demultiplexer.png");
+        ICON_PATHS.put("Decoder",            "/icons2/decoder.png");
+        ICON_PATHS.put("Priority Encoder",   "/icons2/priority_encoder.png");
+        ICON_PATHS.put("Bit Selector",       "/icons2/bit_selector.png");
+        ICON_PATHS.put("D flip flop",        "/icons2/d_flip_flop.png");
+        ICON_PATHS.put("T flip flop",        "/icons2/t_flip_flop.png");
+        ICON_PATHS.put("JK flip flop",       "/icons2/jk_flip_flop.png");
+        ICON_PATHS.put("RS flip flop",       "/icons2/rs_flip_flop.png");
+        ICON_PATHS.put("Register",           "/icons2/register.png");
+        ICON_PATHS.put("Counter",            "/icons2/counter.png");
+        ICON_PATHS.put("RAM",                "/icons2/ram.png");
+        ICON_PATHS.put("ROM",                "/icons2/rom.png");
+        ICON_PATHS.put("Adder",              "/icons2/adder.png");
+        ICON_PATHS.put("Subtractor",         "/icons2/subtractor.png");
+        ICON_PATHS.put("Multiplier",         "/icons2/multiplier.png");
+        ICON_PATHS.put("Shifter",            "/icons2/shifter.png");
+        ICON_PATHS.put("Bit Adder",          "/icons2/bit_adder.png");
+        ICON_PATHS.put("Bit Finder",         "/icons2/bit_finder.png");
+        ICON_PATHS.put("Comparator",         "/icons2/comparator.png");
+        ICON_PATHS.put("Divider",            "/icons2/divider.png");
+        ICON_PATHS.put("Negator",            "/icons2/negator.png");
+        ICON_PATHS.put("Bin",                "/icons2/bin.png");
+        ICON_PATHS.put("Probe",              "/icons2/probe.png");
+        ICON_PATHS.put("Tunnel",             "/icons2/tunnel.png");
+        ICON_PATHS.put("Clock",              "/icons2/clock.png");
+        ICON_PATHS.put("Bus Register",       "/icons2/bus_register.png");
+        // etc. : ajoute ici les autres associations chemin ↔ nom
+    }
+
+    /**
+     * Retourne l'icône redimensionnée pour un nom de composant donné.
+     */
     private ImageIcon getComponentIconByName(String name) {
-        String iconPath;
-        switch (name) {
-            case "Bit Adder": iconPath = "/icons2/bit_adder.png"; break;
-            case "Bit Finder": iconPath = "/icons2/bit_finder.png"; break;
-            case "Comparator": iconPath = "/icons2/comparator.png"; break;
-            case "Divider": iconPath = "/icons2/divider.png"; break;
-            case "Negator": iconPath = "/icons2/negator.png"; break;
-            case "Bin": iconPath = "/icons2/bin.png"; break;
-            case "Probe": iconPath = "/icons2/probe.png"; break;
-            case "Tunnel": iconPath = "/icons2/tunnel.png"; break;
-            case "Clock": iconPath = "/icons2/clock.png"; break;
-            case "Bus Register": iconPath = "/icons2/bus_register.png"; break;
-            default: iconPath = "/icons2/default.png"; break;
-        }
-
-        java.net.URL url = getClass().getResource(iconPath);
-        if (url == null) {
+        String iconPath = ICON_PATHS.getOrDefault(name, "/icons2/default.png");
+        URL resource = getClass().getResource(iconPath);
+        if (resource == null) {
             System.err.println("Icon not found: " + iconPath);
-            return new ImageIcon(); // Retourne une icône vide si l’image n’est pas trouvée
+            return new ImageIcon();  // Icône vide en secours
         }
-
-        ImageIcon icon = new ImageIcon(url);
-        icon.setDescription(iconPath);
-        Image scaledImage = icon.getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaledImage);
+        ImageIcon original = new ImageIcon(resource);
+        Image scaled = original.getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaled);
     }
 
     private String extractIconFileName(ImageIcon icon) {
@@ -943,7 +1211,7 @@ public class MainLayout extends JPanel {
         return "default.png";
     }
 
-    
+
     private void loadCircuitFromXML(File file) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -958,8 +1226,8 @@ public class MainLayout extends JPanel {
 
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) node;
-                    
-                  
+
+
 
                     String name = element.getElementsByTagName("name").item(0).getTextContent();
                     int x = Integer.parseInt(element.getElementsByTagName("x").item(0).getTextContent());
@@ -987,16 +1255,17 @@ public class MainLayout extends JPanel {
     private void ExitBtn(ActionEvent e) {
         int a = JOptionPane.showConfirmDialog(MainLayout.this, "Êtes-vous sûr de vouloir quitter ?", "Confirmation", JOptionPane.YES_NO_OPTION);
         if(a == JOptionPane.YES_OPTION) {
-            System.exit(0);  
+            System.exit(0);
         }
     }
-    
+
+
     public static File showLoadSessionDialog() {
         return showLoadSessionDialog(null);
     }
-    
-    
-    
+
+
+
     public void loadSession(File file) {
         try {
             //  Parser XML
@@ -1004,7 +1273,7 @@ public class MainLayout extends JPanel {
             Document doc = builder.parse(file);
             doc.getDocumentElement().normalize();
 
-            // Réinitialisation
+            //  Réinitialisation
             composantsMap.clear();
             connectionStates.clear();
             circuitDesignArea.removeAll();
@@ -1014,7 +1283,7 @@ public class MainLayout extends JPanel {
             pointPanel.setBounds(0, 0, circuitDesignArea.getWidth(), circuitDesignArea.getHeight());
             circuitDesignArea.add(pointPanel, Integer.valueOf(0));
 
-            
+
             //  Reconstruction des composants
             NodeList comps = doc.getElementsByTagName("component");
             for (int i = 0; i < comps.getLength(); i++) {
@@ -1071,12 +1340,10 @@ public class MainLayout extends JPanel {
         }
     }
 
-
-
-    public void executerCircuit(JLayeredPane circuitDesignArea) {
+public void executerCircuit(JLayeredPane circuitDesignArea) {
     List<AbstractComponent> composants = new ArrayList<>(ConnectionManager.connections.size());
 
-    // Extraire tous les composants graphiques de la liste de connexions
+    /*Extraire tous les composants graphiques de la liste de connexions*/
     for (Connection conn : ConnectionManager.connections) {
         if (!composants.contains(conn.compSource)) {
             composants.add(conn.compSource);
@@ -1086,17 +1353,26 @@ public class MainLayout extends JPanel {
         }
     }
 
-    // Créer une instance de Circuit avec tous les composants + les connexions
-    Circuit circuit = new Circuit(composants, ConnectionManager.connections);
+    circuit = new Circuit(composants, ConnectionManager.connections);
 
-    try {
-        circuit.simulate(7); // 20 itérations max, ajustable
-        //circuitDesignArea.repaint();
-    } catch (Exception e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(this, "Erreur lors de l'exécution du circuit : " + e.getMessage());
-    }
+    /* Lancer la simulation dans un thread séparé pour pas gélé l'interface graphique*/
+    Thread simulationThread = new Thread(() -> {
+        try {
+            circuit.simulate(20); // 20 itérations
+            for (AbstractComponent comp : composants) {
+                ConnectionManager.updateConnectionsForComponent(comp);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            SwingUtilities.invokeLater(() ->
+                JOptionPane.showMessageDialog(null, "Erreur lors de l'exécution du circuit : " + e.getMessage())
+            );
+        }
+    });
+
+    simulationThread.start();
 }
+
     public static int extractIndexFromFileName(String fileName) {
         Pattern pattern = Pattern.compile("saved_circuit_(\\d+)");
         Matcher matcher = pattern.matcher(fileName);
@@ -1219,10 +1495,10 @@ private AbstractComponent createComponentByName(String componentName) {
             comp = new Adder_ig();
             break;
         case "Subtractor":
-            comp = new Subtractor_ig();
+            comp = new Substractor_ig();
             break;
         case "Multiplier":
-            comp = new Multiplier();
+            comp = new Multiplier_ig();
             break;
         case "Comparator":
             comp = new Comparator_ig();
@@ -1250,6 +1526,9 @@ private AbstractComponent createComponentByName(String componentName) {
             break;
         case "Generator_Undetermine":
             comp = new Generator_Undetermine();
+            break;
+        case "Generator_Determinate":
+            comp = new Generator_Determinate();
             break;
         case "RAM":
             comp = new RAM_ig();
