@@ -1,5 +1,5 @@
-package gates ;
-import Principale.*;
+package Logique.gates ;
+import Logique.Principale.*;
 
 public class NON extends Composant {
 
@@ -17,10 +17,12 @@ public class NON extends Composant {
         {
             State input1=this.inputs.get(0);
             State output;
-            if(input1==State.ERROR || input1==State.UNKNOWN)
-            {
-                output=input1;
-            }
+            if(input1==State.ERROR ) {
+	          output=input1;
+	    }
+	    else if(input1==State.UNKNOWN) {
+	           output = State.ERROR;
+	    }
             else
             {
                 if(input1==State.TRUE)
@@ -33,11 +35,31 @@ public class NON extends Composant {
                 }
             }
             this.outputs.set(0,output);
-            this.state=output;  
+            this.state=output;
         }
         else
         {
             throw new IllegalStateException("Erreur d'évaluation : La porte NON doit avoir exactement 1 input et 1 output.");
         }
     }
+      public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }
+

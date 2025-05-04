@@ -1,6 +1,5 @@
-package gates ;
-import Principale.*;
-
+package Logique.gates ;
+import Logique.Principale.*;
 public class ET extends Composant {
 
     public ET(String id, int x,int y )
@@ -23,19 +22,17 @@ public class ET extends Composant {
             {
                 output=State.ERROR;
             }
-            else
-            {
-                if(input1==State.FALSE || input2==State.FALSE)
-                {
-                    output=State.FALSE;
-                }
+            else if ((input1 == State.TRUE && input2 == State.UNKNOWN) ||
+                   (input2 == State.TRUE && input1 == State.UNKNOWN)) {
+                   output = State.ERROR;
+            }
                 else
                     if(input1==State.UNKNOWN || input2==State.UNKNOWN)
                     {
                         output=State.UNKNOWN;
                     }
-                    else 
-                    { 
+                    else
+                    {
                         /*c'est du plus juste au cas ou, les conditions avant le verifie déjà*/
                         if(input1==State.TRUE)
                         {
@@ -46,7 +43,6 @@ public class ET extends Composant {
                             output=State.FALSE;
                         }
                     }
-            }
             this.outputs.set(0,output);
             this.state=output;
         }
@@ -54,5 +50,25 @@ public class ET extends Composant {
         {
             throw new IllegalStateException("Erreur d'évaluation : La porte ET doit avoir exactement 2 inputs et 1 output.");
         }
+    }
+      @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }
