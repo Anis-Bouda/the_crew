@@ -19,7 +19,7 @@ public class CMPT_ig extends AbstractComponent4 {
         setOpaque(false);
         
          /*la création de la porte logique pour le liens  */
-         Counter compteurlogique = new Counter(TOOL_TIP_TEXT_KEY, UNDEFINED_CONDITION, ALLBITS, ABORT);
+          Counter compteurlogique = new Counter("COUNTER#"+System.currentTimeMillis(),2, getX(), getY());
          setComposant(compteurlogique);
 
         addMouseListener(new MouseAdapter() {
@@ -30,12 +30,12 @@ public class CMPT_ig extends AbstractComponent4 {
 
                 for (java.awt.Point port : getInputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("Port d'entrée RAM sélectionné !");
+                        System.out.println("Port d'entrée CMT sélectionné !");
                     }
                 }
                 for (java.awt.Point port : getOutputPorts()) {
                     if (port.distance(clickPoint) < 10) {
-                        System.out.println("Port de sortie RAM sélectionné !");
+                        System.out.println("Port de sortie CMT sélectionné !");
                     }
                 }
             }
