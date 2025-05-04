@@ -25,46 +25,68 @@ public class Circuit{
     	   components.add(c);
      }
      
-     public void simulate(int MAX_ITERATIONS) throws Exception {
+  public void simulate(int MAX_ITERATIONS) throws Exception {
     	    boolean stable=true;
     	    int iteration;
     	    for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
+    	        if(stop)
+    	        {
+                  System.out.println("Simulation arrêtée par l'utilisateur.");
+                  return;
+    	        }
 
-    	        /*Évaluation des composants*/
+    	        // Évaluation des composants
     	        for (AbstractComponent component : components) {
-
+    	             if(stop)
+    	        {
+                  System.out.println("Simulation arrêtée par l'utilisateur.");
+                  return;
+    	        }
     	            List<State> inputs=component.getInputStates();
-		            if (!inputs.isEmpty())
-		            {
-    			      component.setInputsStates(inputs);
-		            }
+		    if (!inputs.isEmpty())
+		    {
+    			component.setInputsStates(inputs);
+		    }
     	            Composant composant=component.getComposant();
     	            if(composant!=null)
     	            {
     	            	composant.evaluate();
+    	            	Thread.sleep(200);
     	            }
     	            component.updateOutputState();
-    	            component.repaint();
-    	        }
+    	            ConnectionManager.updateConnectionsForComponent(component);
+    //SwingUtilities.invokeLater(component::repaint);
 
-    	        for (Connection conn : connections) 
+    // Pause entre les composants
+    //Thread.sleep(300);
+    	        }
+		// Mise à jour des fils
+    	        for (Connection conn : connections)
     	        {
-                   if (conn.filLogic != null && conn.filview != null){
+    	             if(stop)
+    	        {
+                  System.out.println("Simulation arrêtée par l'utilisateur.");
+                  return;
+    	        }
+                   if (conn.filLogic != null && conn.filview != null) 		        {
         			State previousValue = conn.filLogic.getValue();
-            			conn.filLogic.update(); /* met à jour la valeur logique*/
+            			conn.filLogic.update(); // met à jour la valeur logique
             			if (previousValue != conn.filLogic.getValue()) {
     	                stable = false;
     	            }
-        	    }
+
+                  //Thread.sleep(150);
+    	          }
              }
-         }
-	 if (stable) 
+    }
+	 if (stable)
 	 {
     	 	System.out.println("Point fixe atteint après " + (iteration + 1) + " itérations.");
     	 	return;
     	  }
-		  throw new Exception("Erreur : circuit instable après " + MAX_ITERATIONS + " cycles.");
-    	  }
+    	  System.out.println("Fin de la simulation après " + MAX_ITERATIONS + " cycles.");
+    	}
+
 
      
      public List<AbstractComponent> getComponents() {
